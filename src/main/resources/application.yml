@@ -4,7 +4,7 @@ spring:
   
   # Database Configuration (PostgreSQL)
   datasource:
-    url: jdbc:postgresql://localhost:5432/pockito
+    url: jdbc:postgresql://localhost:5434/pockito
     username: pockito
     password: pockito
     driver-class-name: org.postgresql.Driver
