@@ -1,4 +1,4 @@
-package io.ghassen.pockito_core;
+package io.ghassen.pockito;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

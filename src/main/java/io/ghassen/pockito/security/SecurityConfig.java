@@ -1,4 +1,4 @@
-package io.ghassen.pockito_core.security;
+package io.ghassen.pockito.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

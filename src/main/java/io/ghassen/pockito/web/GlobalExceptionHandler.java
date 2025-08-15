@@ -1,4 +1,4 @@
-package io.ghassen.pockito_core.web;
+package io.ghassen.pockito.web;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
