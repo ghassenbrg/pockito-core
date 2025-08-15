@@ -23,10 +23,11 @@ CREATE TABLE currency (
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 
 -- app_user (Keycloak sub UUID as PK)
@@ -39,10 +40,11 @@ CREATE TABLE app_user (
   default_currency CHAR(3) REFERENCES currency(code),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 
 -- exchange_rate (snapshot)
@@ -55,10 +57,11 @@ CREATE TABLE exchange_rate (
   source TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID,
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0,
   UNIQUE (base_code, quote_code, effective_at)
 );
 
@@ -72,10 +75,11 @@ CREATE TABLE icon_asset (
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 
 -- wallet
@@ -93,10 +97,11 @@ CREATE TABLE wallet (
   goal_amount NUMERIC(18,2),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID,
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0,
   CONSTRAINT savings_goal_check CHECK ((type <> 'SAVINGS') OR (goal_amount IS NULL OR goal_amount >= 0))
 );
 CREATE UNIQUE INDEX uq_wallet_user_name_active
@@ -116,10 +121,11 @@ CREATE TABLE category (
   parent_id UUID REFERENCES category(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE UNIQUE INDEX uq_category_user_type_name_active
   ON category (user_id, type, lower(name))
@@ -147,10 +153,11 @@ CREATE TABLE txn (
   external_wallet_name TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID,
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0,
   CONSTRAINT txn_exp_inc_check CHECK (
     (type IN ('EXPENSE','INCOME') AND wallet_id IS NOT NULL AND amount IS NOT NULL AND currency_code IS NOT NULL AND from_wallet_id IS NULL AND to_wallet_id IS NULL)
     OR
@@ -180,10 +187,11 @@ CREATE TABLE subscription (
   next_due_date DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE INDEX ix_subscription_user_next ON subscription(user_id, next_due_date);
 
@@ -199,10 +207,11 @@ CREATE TABLE subscription_payment (
   status payment_status_enum NOT NULL DEFAULT 'PAID',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE INDEX ix_subscription_payment_sub ON subscription_payment(subscription_id, paid_at DESC);
 
@@ -218,10 +227,11 @@ CREATE TABLE budget (
   currency_code CHAR(3) NOT NULL REFERENCES currency(code),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE UNIQUE INDEX uq_budget_user_name_active
   ON budget(user_id, lower(name))
@@ -247,10 +257,11 @@ CREATE TABLE agreement (
   status TEXT NOT NULL DEFAULT 'OPEN',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE INDEX ix_agreement_user_status ON agreement(user_id, status);
 
@@ -265,10 +276,11 @@ CREATE TABLE agreement_payment (
   note TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by UUID,
-  updated_by UUID,
+  created_by VARCHAR(255),
+  updated_by VARCHAR(255),
   archived_at TIMESTAMPTZ,
-  archived_by UUID
+  archived_by VARCHAR(255),
+  version BIGINT DEFAULT 0
 );
 CREATE INDEX ix_agreement_payment_agreement ON agreement_payment(agreement_id, paid_at DESC);
 
