@@ -15,11 +15,11 @@ import java.time.Instant;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/sample")
+@RequestMapping("/api")
 @Tag(name = "Sample", description = "Sample endpoints for testing OpenAPI documentation")
 public class SampleController {
 
-    @GetMapping("/health")
+    @GetMapping("/sample/health")
     @Operation(summary = "Health check", description = "Returns a simple health status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Service is healthy",
@@ -33,7 +33,7 @@ public class SampleController {
         ));
     }
 
-    @GetMapping("/public")
+    @GetMapping({ "/public", "/public/" })
     @Operation(summary = "Public endpoint", description = "A public endpoint that doesn't require authentication")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Public access granted")
@@ -46,7 +46,7 @@ public class SampleController {
         ));
     }
 
-    @GetMapping("/echo/{message}")
+    @GetMapping("/sample/echo/{message}")
     @Operation(summary = "Echo message", description = "Echoes back the provided message")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message echoed successfully"),
@@ -62,7 +62,7 @@ public class SampleController {
         ));
     }
 
-    @PostMapping("/protected")
+    @PostMapping("/sample/protected")
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Protected endpoint", description = "A protected endpoint that requires authentication")
     @ApiResponses(value = {

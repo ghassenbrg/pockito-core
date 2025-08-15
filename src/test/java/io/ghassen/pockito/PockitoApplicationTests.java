@@ -1,4 +1,4 @@
-package io.ghassen.pockito_core;
+package io.ghassen.pockito;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
