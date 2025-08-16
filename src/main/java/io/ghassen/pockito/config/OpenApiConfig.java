@@ -16,7 +16,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Pockito API")
-                        .description("Budget Management Application API")
+                        .description("Personal Finance Application API")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Pockito Team")

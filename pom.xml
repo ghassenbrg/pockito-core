@@ -14,7 +14,7 @@
 	<artifactId>pockito-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Pockito</name>
-	<description>Budget Management App</description>
+	<description>Personal Finance App</description>
 
 	<properties>
 		<java.version>21</java.version>
