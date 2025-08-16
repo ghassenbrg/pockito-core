@@ -8,19 +8,21 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
   @Bean
-  SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
     http
       .csrf(csrf -> csrf.disable())
-      .cors(Customizer.withDefaults())
+      .cors(cors -> cors.configurationSource(corsConfigurationSource))
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS for CORS preflight
         .anyRequest().authenticated()
       )
       .oauth2ResourceServer(oauth2 -> oauth2
@@ -35,4 +37,5 @@ public class SecurityConfig {
     converter.setJwtGrantedAuthoritiesConverter(jwt -> KeycloakRealmRoleConverter.from(jwt));
     return converter;
   }
+
 }
