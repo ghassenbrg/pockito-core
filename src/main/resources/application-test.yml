@@ -1,0 +1,41 @@
+# Test Profile Configuration
+spring:
+  # Database Configuration for Testing
+  datasource:
+    url: jdbc:postgresql://localhost:5434/pockito_test
+    username: pockito_test
+    password: pockito_test
+  
+  # JPA Configuration for Testing
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Flyway Configuration for Testing
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# Logging Configuration for Testing
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    com.pockito: INFO
+    org.springdoc: INFO
+
+# Test-specific settings
+server:
+  port: 8081
+
+# CORS Configuration for testing
+cors:
+  allowed-origins: http://localhost:4200, http://localhost:3000
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: Authorization,Content-Type
