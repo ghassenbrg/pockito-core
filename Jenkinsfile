@@ -74,9 +74,9 @@ pipeline {
             }
             steps {
                 script {
-                    // Login to Docker Hub (credentials should be configured in Jenkins)
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    // Use Docker Hub token for authentication
+                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
+                        sh "echo \"$DOCKERHUB_TOKEN\" | docker login -u ${env.DOCKER_HUB_USERNAME ?: 'ghassenbrg'} --password-stdin"
                         
                         // Tag and push the image
                         sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${DOCKER_TAG}"
