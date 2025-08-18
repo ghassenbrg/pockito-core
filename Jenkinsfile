@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_REPO = 'ghassen-io/pockito-core'
+    IMAGE_REPO = 'ghassenbrg/pockito-core'
     MAVEN_LOCAL = '.m2/repository'
   }
 
