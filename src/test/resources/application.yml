@@ -1,0 +1,67 @@
+# Test Configuration - Uses H2 in-memory database
+spring:
+  application:
+    name: Pockito-Test
+  
+  # Database Configuration (H2 in-memory for tests)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  # JPA Configuration for tests
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # Disable Flyway for tests
+  flyway:
+    enabled: false
+  
+  # Security Configuration for tests
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test-auth.ghassen.io/realms/pockito
+          jwk-set-uri: https://test-auth.ghassen.io/realms/pockito/protocol/openid-connect/certs
+
+# OpenAPI/Swagger Configuration for tests
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true
+
+# CORS Configuration for tests
+cors:
+  allowed-origins: http://localhost:4200
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: Authorization,Content-Type
+
+# Actuator Configuration for tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging Configuration for tests
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    io.ghassen.pockito: DEBUG
