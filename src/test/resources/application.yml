@@ -29,8 +29,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://test-auth.ghassen.io/realms/pockito
-          jwk-set-uri: https://test-auth.ghassen.io/realms/pockito/protocol/openid-connect/certs
+          issuer-uri: https://auth.ghassen.io/realms/pockito
+          jwk-set-uri: https://auth.ghassen.io/realms/pockito/protocol/openid-connect/certs
 
 # OpenAPI/Swagger Configuration for tests
 springdoc:
