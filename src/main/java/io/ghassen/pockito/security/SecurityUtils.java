@@ -191,4 +191,20 @@ public class SecurityUtils {
     
     return null;
   }
+
+  /**
+   * Gets the current authentication object from the security context.
+   * 
+   * @return The current authentication object
+   * @throws IllegalStateException if no authentication is found
+   */
+  public static Authentication getCurrentAuthentication() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    
+    if (auth == null || !auth.isAuthenticated()) {
+      throw new IllegalStateException("No valid authentication found");
+    }
+    
+    return auth;
+  }
 }

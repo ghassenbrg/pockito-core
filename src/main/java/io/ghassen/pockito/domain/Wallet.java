@@ -3,9 +3,7 @@ package io.ghassen.pockito.domain;
 import java.math.BigDecimal;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
@@ -23,7 +21,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "wallet")
-@FilterDef(name = "archivedFilter", parameters = @ParamDef(name = "archived", type = Boolean.class))
 @Filter(name = "archivedFilter", condition = "archived_at IS NULL")
 @Getter
 @Setter
