@@ -47,7 +47,4 @@ public class Category extends AuditableEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id")
   private Category parent;
-
-  @Column(name = "parent_id", insertable = false, updatable = false)
-  private UUID parentId;
 }

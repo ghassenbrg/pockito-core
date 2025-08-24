@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class ActivityLog extends AuditableEntityNoId {
+public class ActivityLog extends AuditableEntity {
 
   @Column(nullable = false, name = "user_id")
   private String userId;

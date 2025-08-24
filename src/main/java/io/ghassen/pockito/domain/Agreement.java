@@ -1,14 +1,24 @@
 package io.ghassen.pockito.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "agreement")
@@ -45,9 +55,6 @@ public class Agreement extends AuditableEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "wallet_id")
   private Wallet wallet;
-
-  @Column(name = "wallet_id", insertable = false, updatable = false)
-  private UUID walletId;
 
   @Column(nullable = false, name = "start_date")
   private LocalDate startDate = LocalDate.now();

@@ -52,15 +52,9 @@ public class Subscription extends AuditableEntity {
   @JoinColumn(name = "wallet_id")
   private Wallet wallet;
 
-  @Column(name = "wallet_id", insertable = false, updatable = false)
-  private UUID walletId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id")
   private Category category;
-
-  @Column(name = "category_id", insertable = false, updatable = false)
-  private UUID categoryId;
 
   @Enumerated(EnumType.STRING)
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)

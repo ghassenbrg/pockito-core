@@ -42,15 +42,9 @@ public class Transaction extends AuditableEntity {
   @JoinColumn(name = "wallet_id")
   private Wallet wallet;
 
-  @Column(name = "wallet_id", insertable = false, updatable = false)
-  private UUID walletId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id")
   private Category category;
-
-  @Column(name = "category_id", insertable = false, updatable = false)
-  private UUID categoryId;
 
   @Column(precision = 18, scale = 2)
   private BigDecimal amount;
@@ -63,15 +57,9 @@ public class Transaction extends AuditableEntity {
   @JoinColumn(name = "from_wallet_id")
   private Wallet fromWallet;
 
-  @Column(name = "from_wallet_id", insertable = false, updatable = false)
-  private UUID fromWalletId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "to_wallet_id")
   private Wallet toWallet;
-
-  @Column(name = "to_wallet_id", insertable = false, updatable = false)
-  private UUID toWalletId;
 
   @Column(precision = 18, scale = 2, name = "from_amount")
   private BigDecimal fromAmount;

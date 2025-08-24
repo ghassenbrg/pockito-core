@@ -23,15 +23,9 @@ public class AgreementPayment extends AuditableEntity {
   @JoinColumn(name = "agreement_id", nullable = false)
   private Agreement agreement;
 
-  @Column(name = "agreement_id", insertable = false, updatable = false)
-  private UUID agreementId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "txn_id")
   private Transaction transaction;
-
-  @Column(name = "txn_id", insertable = false, updatable = false)
-  private UUID transactionId;
 
   @Column(nullable = false, precision = 18, scale = 2)
   private BigDecimal amount;

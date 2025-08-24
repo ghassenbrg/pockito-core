@@ -19,15 +19,9 @@ public class BudgetCategory {
   @JoinColumn(name = "budget_id", nullable = false)
   private Budget budget;
 
-  @Column(name = "budget_id", insertable = false, updatable = false)
-  private UUID budgetId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
-
-  @Column(name = "category_id", insertable = false, updatable = false)
-  private UUID categoryId;
 
   // Composite primary key
   @EmbeddedId
@@ -38,7 +32,10 @@ public class BudgetCategory {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class BudgetCategoryId {
+    @Column(name = "budget_id", insertable = false, updatable = false)
     private UUID budgetId;
+    
+    @Column(name = "category_id", insertable = false, updatable = false)
     private UUID categoryId;
   }
 }

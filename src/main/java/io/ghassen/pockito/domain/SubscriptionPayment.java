@@ -29,15 +29,9 @@ public class SubscriptionPayment extends AuditableEntity {
   @JoinColumn(name = "subscription_id", nullable = false)
   private Subscription subscription;
 
-  @Column(name = "subscription_id", insertable = false, updatable = false)
-  private UUID subscriptionId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "txn_id")
   private Transaction transaction;
-
-  @Column(name = "txn_id", insertable = false, updatable = false)
-  private UUID transactionId;
 
   @Column(nullable = false, precision = 18, scale = 2)
   private BigDecimal amount;
