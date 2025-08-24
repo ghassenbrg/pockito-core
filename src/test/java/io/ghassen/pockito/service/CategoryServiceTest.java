@@ -256,7 +256,7 @@ class CategoryServiceTest {
   void update_ShouldUpdateCategory_WhenValidRequest() {
     Category existingCategory = createTestCategory("Old Name", Category.CategoryType.EXPENSE);
     var req = new CategoryDtos.UpdateReq(
-        "New Name", Category.CategoryType.EXPENSE, "#00FF00",
+        "New Name", "#00FF00",
         Wallet.IconType.EMOJI, "💡", null
     );
 
@@ -278,7 +278,7 @@ class CategoryServiceTest {
   void update_ShouldThrowException_WhenNameAlreadyExists() {
     Category existingCategory = createTestCategory("Old Name", Category.CategoryType.EXPENSE);
     var req = new CategoryDtos.UpdateReq(
-        "Existing Name", Category.CategoryType.EXPENSE, "#00FF00",
+        "Existing Name", "#00FF00",
         Wallet.IconType.EMOJI, "💡", null
     );
 
@@ -297,7 +297,7 @@ class CategoryServiceTest {
   void update_ShouldThrowException_WhenCircularReference() {
     Category existingCategory = createTestCategory("Test Category", Category.CategoryType.EXPENSE);
     var req = new CategoryDtos.UpdateReq(
-        "Test Category", Category.CategoryType.EXPENSE, "#00FF00",
+        "Test Category", "#00FF00",
         Wallet.IconType.EMOJI, "💡", CATEGORY_ID
     );
 

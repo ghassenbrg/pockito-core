@@ -39,9 +39,6 @@ public class CategoryDtos {
         @Size(min = 1, max = 100, message = "Category name must be between 1 and 100 characters")
         String name,
 
-        @NotNull(message = "Category type is required")
-        Category.CategoryType type,
-
         @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Color must be a valid hex color code")
         String color,
 

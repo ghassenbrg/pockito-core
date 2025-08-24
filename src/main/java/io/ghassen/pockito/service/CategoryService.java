@@ -115,7 +115,7 @@ public class CategoryService {
 
     // Check for unique name within the same type for the user (excluding current category)
     if (!category.getName().equalsIgnoreCase(req.name()) &&
-        categoryRepo.existsActiveByUserIdAndTypeAndNameIgnoreCaseExcludingId(userId, req.type(), req.name(), id)) {
+        categoryRepo.existsActiveByUserIdAndTypeAndNameIgnoreCaseExcludingId(userId, category.getType(), req.name(), id)) {
       throw new IllegalArgumentException("Category name already exists for this type");
     }
 
@@ -129,11 +129,6 @@ public class CategoryService {
         throw new IllegalArgumentException("Cannot set archived category as parent");
       }
       
-      // Ensure parent is of the same type
-      if (parent.getType() != req.type()) {
-        throw new IllegalArgumentException("Parent category must be of the same type");
-      }
-      
       // Prevent circular reference
       if (req.parentId().equals(id)) {
         throw new IllegalArgumentException("Category cannot be its own parent");
@@ -141,7 +136,6 @@ public class CategoryService {
     }
 
     category.setName(req.name());
-    category.setType(req.type());
     category.setColor(req.color());
     category.setIconType(req.iconType());
     category.setIconValue(req.iconValue());

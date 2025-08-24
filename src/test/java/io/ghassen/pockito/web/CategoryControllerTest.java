@@ -210,7 +210,7 @@ class CategoryControllerTest {
   void update_ShouldReturnBadRequest_WhenInvalidRequest() throws Exception {
     // Given
     CategoryDtos.UpdateReq invalidReq = new CategoryDtos.UpdateReq(
-        "", Category.CategoryType.EXPENSE, "#invalid", null, null, null
+        "", "#invalid", null, null, null
     );
 
     // When & Then
@@ -275,7 +275,7 @@ class CategoryControllerTest {
 
   private CategoryDtos.UpdateReq createTestUpdateReq() {
     return new CategoryDtos.UpdateReq(
-        "Updated Category", Category.CategoryType.EXPENSE, "#00FF00",
+        "Updated Category", "#00FF00",
         io.ghassen.pockito.domain.Wallet.IconType.EMOJI,
         "💡",
         null
