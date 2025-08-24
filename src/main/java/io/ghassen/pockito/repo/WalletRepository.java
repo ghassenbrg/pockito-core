@@ -19,7 +19,8 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
   
   List<Wallet> findByUserIdOrderByCreatedAtDesc(String userId);
   
-  Optional<Wallet> findByUserIdAndIsDefaultTrue(String userId);
+  @Query("SELECT w FROM Wallet w WHERE w.userId = :userId AND w.isDefault = true")
+  Optional<Wallet> findByUserIdAndIsDefaultTrue(@Param("userId") String userId);
   
   boolean existsByUserIdAndNameIgnoreCaseAndArchivedAtIsNull(String userId, String name);
   

@@ -71,10 +71,10 @@ public abstract class AuditableEntityNoId {
   @PreUpdate
   private void setUpdatedByUserId() {
     if (systemAction) {
-      this.setCreatedBy("system");
+      this.setUpdatedBy("system");
       return;
     }
-    this.setCreatedBy(SecurityUtils.getCurrentUserId());
+    this.setUpdatedBy(SecurityUtils.getCurrentUserId());
   }
 
 }

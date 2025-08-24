@@ -399,7 +399,6 @@ INSERT INTO currency (code, name, symbol, decimals, is_active) VALUES
   ('CNY', 'Chinese Yuan', '¥', 2, true),
   ('INR', 'Indian Rupee', '₹', 2, true),
   ('BRL', 'Brazilian Real', 'R$', 2, true);
-
 -- Insert default icon assets
 INSERT INTO icon_asset (type, value, label, tags, is_active) VALUES
   ('EMOJI', '💰', 'Money Bag', ARRAY['money', 'cash', 'finance'], true),
@@ -417,3 +416,4 @@ INSERT INTO icon_asset (type, value, label, tags, is_active) VALUES
   ('EMOJI', '✈️', 'Travel', ARRAY['travel', 'flight', 'vacation'], true),
   ('EMOJI', '💊', 'Health', ARRAY['health', 'medical', 'pharmacy'], true),
   ('EMOJI', '🎓', 'Education', ARRAY['education', 'school', 'learning'], true);
+

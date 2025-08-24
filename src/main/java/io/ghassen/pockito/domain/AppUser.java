@@ -4,13 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "app_user")
-@Filter(name = "archivedFilter", condition = "archived_at IS NULL")
 @Getter @Setter @SuperBuilder @NoArgsConstructor @AllArgsConstructor
 public class AppUser extends AuditableEntityNoId {
 
