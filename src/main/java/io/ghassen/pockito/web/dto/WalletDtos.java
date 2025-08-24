@@ -78,6 +78,7 @@ public class WalletDtos {
     WalletType type,
     BigDecimal initialBalance,
     boolean isDefault,
+    boolean isActive,
     BigDecimal goalAmount,
     String userId,
     java.time.Instant createdAt,

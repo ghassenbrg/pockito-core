@@ -24,9 +24,44 @@ public class WalletController {
 
   @GetMapping
   @PreAuthorize("hasRole('USER')")
-  public List<WalletDtos.Resp> list() {
-    log.debug("Listing wallets");
-    return service.list().stream().map(this::toResp).toList();
+  public List<WalletDtos.Resp> list(
+      @RequestParam(defaultValue = "true") boolean includeArchived) {
+    log.debug("Listing wallets with includeArchived: {}", includeArchived);
+    return service.list(includeArchived).stream().map(this::toResp).toList();
+  }
+
+  @GetMapping("/search")
+  @PreAuthorize("hasRole('USER')")
+  public List<WalletDtos.Resp> search(
+      @RequestParam(required = false) String searchTerm,
+      @RequestParam(defaultValue = "true") boolean includeArchived) {
+    log.debug("Searching wallets with term: '{}', includeArchived: {}", searchTerm, includeArchived);
+    return service.searchWallets(searchTerm, includeArchived).stream().map(this::toResp).toList();
+  }
+
+  @GetMapping("/type/{type}")
+  @PreAuthorize("hasRole('USER')")
+  public List<WalletDtos.Resp> getByType(
+      @PathVariable Wallet.WalletType type,
+      @RequestParam(defaultValue = "true") boolean includeArchived) {
+    log.debug("Getting wallets by type: {} with includeArchived: {}", type, includeArchived);
+    return service.getWalletsByType(type, includeArchived).stream().map(this::toResp).toList();
+  }
+
+  @GetMapping("/status/active")
+  @PreAuthorize("hasRole('USER')")
+  public List<WalletDtos.Resp> getActiveWallets() {
+    log.debug("Getting active wallets only");
+    return service.list(false).stream().map(this::toResp).toList();
+  }
+
+  @GetMapping("/currency/{currencyCode}")
+  @PreAuthorize("hasRole('USER')")
+  public List<WalletDtos.Resp> getByCurrency(
+      @PathVariable String currencyCode,
+      @RequestParam(defaultValue = "true") boolean includeArchived) {
+    log.debug("Getting wallets by currency: {} with includeArchived: {}", currencyCode, includeArchived);
+    return service.getWalletsByCurrency(currencyCode, includeArchived).stream().map(this::toResp).toList();
   }
 
   @GetMapping("/{id}")
@@ -87,6 +122,7 @@ public class WalletController {
       wallet.getType(),
       wallet.getInitialBalance(),
       wallet.isDefault(),
+      wallet.getArchivedAt() == null,
       wallet.getGoalAmount(),
       wallet.getUserId(),
       wallet.getCreatedAt(),
