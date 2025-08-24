@@ -295,16 +295,18 @@ class WalletServiceTest {
     Wallet wallet = createTestWallet("Test Wallet");
     when(walletRepo.findByIdAndUserId(WALLET_ID, USER_ID))
       .thenReturn(Optional.of(wallet));
-    when(walletRepo.findByUserIdAndIsDefaultTrue(USER_ID))
+    when(walletRepo.findDefaultForUpdate(USER_ID))
       .thenReturn(Optional.empty());
-    when(walletRepo.save(any(Wallet.class))).thenReturn(wallet);
+    when(walletRepo.setDefaultForUser(USER_ID, WALLET_ID))
+      .thenReturn(1);
 
     // When
     walletService.setDefault(WALLET_ID);
 
     // Then
-    assertThat(wallet.isDefault()).isTrue();
-    verify(walletRepo).save(wallet);
+    verify(walletRepo).findByIdAndUserId(WALLET_ID, USER_ID);
+    verify(walletRepo).findDefaultForUpdate(USER_ID);
+    verify(walletRepo).setDefaultForUser(USER_ID, WALLET_ID);
   }
 
   @Test
@@ -321,17 +323,18 @@ class WalletServiceTest {
     
     when(walletRepo.findByIdAndUserId(WALLET_ID, USER_ID))
       .thenReturn(Optional.of(newDefault));
-    when(walletRepo.findByUserIdAndIsDefaultTrue(USER_ID))
+    when(walletRepo.findDefaultForUpdate(USER_ID))
       .thenReturn(Optional.of(currentDefault));
-    when(walletRepo.save(any(Wallet.class))).thenReturn(currentDefault).thenReturn(newDefault);
+    when(walletRepo.setDefaultForUser(USER_ID, WALLET_ID))
+      .thenReturn(1);
 
     // When
     walletService.setDefault(WALLET_ID);
 
     // Then
-    assertThat(currentDefault.isDefault()).isFalse();
-    assertThat(newDefault.isDefault()).isTrue();
-    verify(walletRepo, times(2)).save(any(Wallet.class));
+    verify(walletRepo).findByIdAndUserId(WALLET_ID, USER_ID);
+    verify(walletRepo).findDefaultForUpdate(USER_ID);
+    verify(walletRepo).setDefaultForUser(USER_ID, WALLET_ID);
   }
 
   @Test
@@ -342,16 +345,18 @@ class WalletServiceTest {
     
     when(walletRepo.findByIdAndUserId(WALLET_ID, USER_ID))
       .thenReturn(Optional.of(wallet));
-    when(walletRepo.findByUserIdAndIsDefaultTrue(USER_ID))
+    when(walletRepo.findDefaultForUpdate(USER_ID))
       .thenReturn(Optional.of(wallet));
-    when(walletRepo.save(any(Wallet.class))).thenReturn(wallet);
+    when(walletRepo.setDefaultForUser(USER_ID, WALLET_ID))
+      .thenReturn(1);
 
     // When
     walletService.setDefault(WALLET_ID);
 
     // Then
-    assertThat(wallet.isDefault()).isTrue();
-    verify(walletRepo, times(1)).save(any(Wallet.class)); // Only one save for the same wallet
+    verify(walletRepo).findByIdAndUserId(WALLET_ID, USER_ID);
+    verify(walletRepo).findDefaultForUpdate(USER_ID);
+    verify(walletRepo).setDefaultForUser(USER_ID, WALLET_ID);
   }
 
   private Wallet createTestWallet(String name) {
