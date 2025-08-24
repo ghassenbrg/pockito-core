@@ -75,11 +75,21 @@ public class Wallet extends AuditableEntity {
   @Column(precision = 18, scale = 2, name = "goal_amount")
   private BigDecimal goalAmount;
 
+  @Column(nullable = false, name = "display_order")
+  private Integer displayOrder;
+
   @PrePersist
   @PreUpdate
-  private void validateSavingsGoal() {
+  private void validateAndPrepare() {
+    // Validate savings goal
     if (type == WalletType.SAVINGS && goalAmount != null && goalAmount.compareTo(BigDecimal.ZERO) < 0) {
       throw new IllegalArgumentException("Savings goal amount must be non-negative");
+    }
+    
+    // Set display order if not provided
+    if (displayOrder == null) {
+      // This will be set by the service layer before saving
+      displayOrder = 1;
     }
   }
 }

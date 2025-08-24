@@ -2,7 +2,7 @@
 spring:
   # Database Configuration for Development
   datasource:
-    url: jdbc:postgresql://localhost:5432/pockito
+    url: jdbc:postgresql://localhost:5440/pockito
     username: postgres
     password: root
   

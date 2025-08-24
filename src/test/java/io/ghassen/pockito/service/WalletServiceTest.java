@@ -60,7 +60,7 @@ class WalletServiceTest {
     // Given
     Wallet wallet1 = createTestWallet("Wallet 1");
     Wallet wallet2 = createTestWallet("Wallet 2");
-    when(walletRepo.findByUserIdOrderByCreatedAtDesc(USER_ID))
+    when(walletRepo.findByUserIdOrderByDisplayOrder(USER_ID))
       .thenReturn(List.of(wallet1, wallet2));
 
     // When
@@ -69,7 +69,7 @@ class WalletServiceTest {
     // Then
     assertThat(result).hasSize(2);
     assertThat(result).containsExactly(wallet1, wallet2);
-    verify(walletRepo).findByUserIdOrderByCreatedAtDesc(USER_ID);
+    verify(walletRepo).findByUserIdOrderByDisplayOrder(USER_ID);
   }
 
   @Test
@@ -258,7 +258,7 @@ class WalletServiceTest {
     
     when(walletRepo.findByIdAndUserId(WALLET_ID, USER_ID))
       .thenReturn(Optional.of(defaultWallet));
-    when(walletRepo.findByUserIdOrderByCreatedAtDesc(USER_ID))
+    when(walletRepo.findByUserIdOrderByDisplayOrder(USER_ID))
       .thenReturn(List.of(defaultWallet, otherWallet));
     when(walletRepo.save(any(Wallet.class))).thenReturn(defaultWallet).thenReturn(otherWallet);
 

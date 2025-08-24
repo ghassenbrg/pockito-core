@@ -81,6 +81,7 @@ public class WalletDtos {
     boolean isActive,
     BigDecimal goalAmount,
     String userId,
+    Integer displayOrder,
     java.time.Instant createdAt,
     java.time.Instant updatedAt
   ) {}

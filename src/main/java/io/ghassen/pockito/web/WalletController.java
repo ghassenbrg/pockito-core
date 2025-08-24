@@ -111,6 +111,24 @@ public class WalletController {
     return ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/{id}/reorder")
+  @PreAuthorize("hasRole('USER')")
+  public ResponseEntity<Void> reorder(
+      @PathVariable UUID id,
+      @RequestParam Integer newOrder) {
+    log.debug("Reordering wallet {} to position: {}", id, newOrder);
+    service.reorderWallets(id, newOrder);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/normalize-orders")
+  @PreAuthorize("hasRole('USER')")
+  public ResponseEntity<Void> normalizeDisplayOrders() {
+    log.debug("Normalizing display orders for current user");
+    service.normalizeDisplayOrders();
+    return ResponseEntity.ok().build();
+  }
+
   private WalletDtos.Resp toResp(Wallet wallet) {
     return new WalletDtos.Resp(
       wallet.getId(),
@@ -125,6 +143,7 @@ public class WalletController {
       wallet.getArchivedAt() == null,
       wallet.getGoalAmount(),
       wallet.getUserId(),
+      wallet.getDisplayOrder(),
       wallet.getCreatedAt(),
       wallet.getUpdatedAt()
     );
