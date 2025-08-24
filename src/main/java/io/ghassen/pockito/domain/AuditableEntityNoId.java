@@ -1,19 +1,29 @@
 package io.ghassen.pockito.domain;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import java.time.Instant;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
-import java.time.Instant;
+import io.ghassen.pockito.security.SecurityUtils;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @MappedSuperclass
-@Getter @Setter @SuperBuilder @NoArgsConstructor
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
 public abstract class AuditableEntityNoId {
 
   @CreationTimestamp
@@ -24,10 +34,12 @@ public abstract class AuditableEntityNoId {
   @Column(nullable = false, name = "updated_at")
   private Instant updatedAt;
 
-  @CreatedBy @Column(name = "created_by")
+  @CreatedBy
+  @Column(name = "created_by")
   private String createdBy;
 
-  @LastModifiedBy @Column(name = "updated_by")
+  @LastModifiedBy
+  @Column(name = "updated_by")
   private String updatedBy;
 
   @Column(name = "archived_at")
@@ -38,4 +50,31 @@ public abstract class AuditableEntityNoId {
 
   @Version
   private Long version;
+
+  /**
+   * Indicates whether the last create or update operation was performed by the
+   * system (not a user).
+   * This is a transient field and is not persisted to the database.
+   */
+  @Transient
+  private boolean systemAction = false;
+
+  @PrePersist
+  private void setCreatedByUserId() {
+    if (systemAction) {
+      this.setCreatedBy("system");
+      return;
+    }
+    this.setCreatedBy(SecurityUtils.getCurrentUserId());
+  }
+
+  @PreUpdate
+  private void setUpdatedByUserId() {
+    if (systemAction) {
+      this.setCreatedBy("system");
+      return;
+    }
+    this.setCreatedBy(SecurityUtils.getCurrentUserId());
+  }
+
 }

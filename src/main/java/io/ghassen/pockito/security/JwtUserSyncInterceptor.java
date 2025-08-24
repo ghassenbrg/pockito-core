@@ -65,8 +65,7 @@ public class JwtUserSyncInterceptor implements HandlerInterceptor {
                 .emailVerified(jwtToken.getToken().getClaimAsBoolean("email_verified"))
                 .locale(jwtToken.getToken().getClaimAsString("locale"))
                 .timezone(jwtToken.getToken().getClaimAsString("zoneinfo"))
-                .createdBy("system")
-                .updatedBy("system")
+                .systemAction(true)
                 .build();
 
             appUserRepository.save(newUser);
