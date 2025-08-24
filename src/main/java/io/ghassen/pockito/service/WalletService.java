@@ -88,6 +88,12 @@ public class WalletService {
       throw new IllegalArgumentException("Wallet name already exists");
     }
 
+    // Validate goal amount for savings
+    if (req.type() == Wallet.WalletType.SAVINGS && req.goalAmount() != null
+        && req.goalAmount().compareTo(BigDecimal.ZERO) < 0) {
+      throw new IllegalArgumentException("Savings goal amount must be non-negative");
+    }
+
     // Get the next available display order
     Integer nextDisplayOrder = walletRepo.findMaxDisplayOrderByUserId(userId);
     nextDisplayOrder = (nextDisplayOrder != null ? nextDisplayOrder : 0) + 1;
