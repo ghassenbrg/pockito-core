@@ -44,7 +44,7 @@ class WalletServiceTest {
   @InjectMocks
   private WalletService walletService;
 
-  private static final UUID USER_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+  private static final String USER_ID = "123e4567-e89b-12d3-a456-426614174000";
   private static final UUID WALLET_ID = UUID.randomUUID();
 
   @BeforeEach

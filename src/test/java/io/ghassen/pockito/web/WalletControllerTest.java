@@ -9,11 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -35,13 +35,13 @@ class WalletControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @MockitoBean
   private WalletService walletService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
-  private static final UUID USER_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+  private static final String USER_ID = "123e4567-e89b-12d3-a456-426614174000";
   private static final UUID WALLET_ID = UUID.randomUUID();
   private static final String BASE_URL = "/api/wallets";
 

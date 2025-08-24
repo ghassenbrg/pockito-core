@@ -2,13 +2,12 @@ package io.ghassen.pockito.service;
 
 import io.ghassen.pockito.domain.Wallet;
 import io.ghassen.pockito.repo.WalletRepository;
+import io.ghassen.pockito.security.SecurityUtils;
 import io.ghassen.pockito.web.dto.WalletDtos;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,27 +22,14 @@ public class WalletService {
   
   private final WalletRepository walletRepo;
 
-  private UUID currentUserId() {
-    var auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth instanceof JwtAuthenticationToken jwt) {
-      String subject = jwt.getToken().getSubject();
-      try {
-        return UUID.fromString(subject);
-      } catch (IllegalArgumentException e) {
-        throw new IllegalStateException("Invalid user ID format: " + subject);
-      }
-    }
-    throw new IllegalStateException("No authenticated user found");
-  }
-
   public List<Wallet> list() {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Listing wallets for user: {}", userId);
     return walletRepo.findByUserIdOrderByCreatedAtDesc(userId);
   }
 
   public Wallet get(UUID id) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Getting wallet {} for user: {}", id, userId);
     return walletRepo.findByIdAndUserId(id, userId)
       .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
@@ -51,7 +37,7 @@ public class WalletService {
 
   @Transactional
   public Wallet create(WalletDtos.CreateReq req) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Creating wallet '{}' for user: {}", req.name(), userId);
     
     // Check for unique name
@@ -85,7 +71,7 @@ public class WalletService {
 
   @Transactional
   public Wallet update(UUID id, WalletDtos.UpdateReq req) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Updating wallet {} for user: {}", id, userId);
     
     Wallet wallet = get(id);
@@ -116,7 +102,7 @@ public class WalletService {
 
   @Transactional
   public void archive(UUID id) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Archiving wallet {} for user: {}", id, userId);
     
     Wallet wallet = get(id);
@@ -137,7 +123,7 @@ public class WalletService {
     
     // Archive the wallet
     wallet.setArchivedAt(Instant.now());
-    wallet.setArchivedBy(userId.toString());
+    wallet.setArchivedBy(userId);
     walletRepo.save(wallet);
     
     // Reassign default if needed
@@ -152,7 +138,7 @@ public class WalletService {
 
   @Transactional
   public void activate(UUID id) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Activating wallet {} for user: {}", id, userId);
     
     Wallet wallet = get(id);
@@ -165,7 +151,7 @@ public class WalletService {
 
   @Transactional
   public void setDefault(UUID id) {
-    UUID userId = currentUserId();
+    String userId = SecurityUtils.getCurrentUserId();
     log.debug("Setting wallet {} as default for user: {}", id, userId);
     
     Wallet wallet = get(id);

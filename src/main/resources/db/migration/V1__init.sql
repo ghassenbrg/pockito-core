@@ -33,7 +33,7 @@ CREATE TABLE currency (
 
 -- app_user (Keycloak sub UUID as PK)
 CREATE TABLE app_user (
-  id UUID PRIMARY KEY,
+  id VARCHAR(255) PRIMARY KEY,
   email CITEXT UNIQUE NOT NULL,
   display_name TEXT,
   locale VARCHAR(10),
@@ -96,7 +96,7 @@ CREATE INDEX ix_icon_asset_label ON icon_asset(label) WHERE label IS NOT NULL;
 -- wallet
 CREATE TABLE wallet (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   icon_type icon_type_enum NOT NULL,
   icon_value TEXT NOT NULL,
@@ -132,7 +132,7 @@ CREATE INDEX ix_wallet_archived ON wallet(archived_at) WHERE archived_at IS NOT 
 -- category
 CREATE TABLE category (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   type category_type_enum NOT NULL,
   name TEXT NOT NULL,
   color VARCHAR(7),
@@ -162,7 +162,7 @@ CREATE INDEX ix_category_archived ON category(archived_at) WHERE archived_at IS 
 -- txn
 CREATE TABLE txn (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   type txn_type_enum NOT NULL,
   occurred_at DATE NOT NULL,
   note TEXT,
@@ -210,7 +210,7 @@ CREATE INDEX ix_txn_occurred_at ON txn(occurred_at);
 -- subscription
 CREATE TABLE subscription (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   icon_type icon_type_enum,
   icon_value TEXT,
@@ -279,7 +279,7 @@ CREATE INDEX ix_subscription_payment_archived ON subscription_payment(archived_a
 -- budget
 CREATE TABLE budget (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   period freq_type_enum NOT NULL DEFAULT 'MONTHLY',
   start_date DATE NOT NULL,
@@ -315,7 +315,7 @@ CREATE INDEX ix_budget_category_category ON budget_category(category_id);
 -- agreement
 CREATE TABLE agreement (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   person_name TEXT NOT NULL,
   type agreement_type_enum NOT NULL,
   principal_amount NUMERIC(18,2) NOT NULL,
@@ -369,7 +369,7 @@ CREATE INDEX ix_agreement_payment_archived ON agreement_payment(archived_at) WHE
 -- activity_log
 CREATE TABLE activity_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
   entity_type TEXT NOT NULL,
   entity_id UUID NOT NULL,
   action TEXT NOT NULL,

@@ -36,6 +36,15 @@ public class GlobalExceptionHandler {
     return problem(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<Object> handleIllegalState(IllegalStateException ex) {
+    // Handle JWT authentication errors and other state-related issues
+    if (ex.getMessage().contains("JWT") || ex.getMessage().contains("authentication")) {
+      return problem(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+    return problem(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
+
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<Object> handleNotFound(RuntimeException ex) {
     return problem(HttpStatus.NOT_FOUND, ex.getMessage());

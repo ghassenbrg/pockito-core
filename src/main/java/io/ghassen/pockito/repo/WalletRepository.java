@@ -13,17 +13,17 @@ import java.util.UUID;
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
   
-  List<Wallet> findByUserIdOrderByCreatedAtDesc(UUID userId);
+  List<Wallet> findByUserIdOrderByCreatedAtDesc(String userId);
   
-  Optional<Wallet> findByUserIdAndIsDefaultTrue(UUID userId);
+  Optional<Wallet> findByUserIdAndIsDefaultTrue(String userId);
   
-  boolean existsByUserIdAndNameIgnoreCaseAndArchivedAtIsNull(UUID userId, String name);
+  boolean existsByUserIdAndNameIgnoreCaseAndArchivedAtIsNull(String userId, String name);
   
-  Optional<Wallet> findByIdAndUserId(UUID id, UUID userId);
+  Optional<Wallet> findByIdAndUserId(UUID id, String userId);
   
   @Query("SELECT w FROM Wallet w WHERE w.userId = :userId AND w.archivedAt IS NULL ORDER BY w.createdAt DESC")
-  List<Wallet> findActiveByUserId(@Param("userId") UUID userId);
+  List<Wallet> findActiveByUserId(@Param("userId") String userId);
   
   @Query("SELECT COUNT(w) > 0 FROM Wallet w WHERE w.userId = :userId AND LOWER(w.name) = LOWER(:name) AND w.archivedAt IS NULL")
-  boolean existsActiveByNameIgnoreCase(@Param("userId") UUID userId, @Param("name") String name);
+  boolean existsActiveByNameIgnoreCase(@Param("userId") String userId, @Param("name") String name);
 }

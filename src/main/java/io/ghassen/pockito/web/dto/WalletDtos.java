@@ -79,7 +79,7 @@ public class WalletDtos {
     BigDecimal initialBalance,
     boolean isDefault,
     BigDecimal goalAmount,
-    UUID userId,
+    String userId,
     java.time.Instant createdAt,
     java.time.Instant updatedAt
   ) {}

@@ -1,33 +1,59 @@
 package io.ghassen.pockito.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.type.SqlTypes;
-import java.math.BigDecimal;
-import java.util.UUID;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "wallet")
 @FilterDef(name = "archivedFilter", parameters = @ParamDef(name = "archived", type = Boolean.class))
 @Filter(name = "archivedFilter", condition = "archived_at IS NULL")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Wallet extends AuditableEntity {
 
-  public enum WalletType { SAVINGS, BANK_ACCOUNT, CASH, CREDIT_CARD, CUSTOM }
-  public enum IconType { EMOJI, URL }
+  public enum WalletType {
+    SAVINGS,
+    BANK_ACCOUNT,
+    CASH,
+    CREDIT_CARD,
+    CUSTOM;
+  }
+
+  public enum IconType {
+    EMOJI,
+    URL;
+  }
 
   @Column(nullable = false, name = "user_id")
-  private UUID userId;
+  private String userId;
 
   @Column(nullable = false)
   private String name;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, name = "icon_type")
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(nullable = false, name = "icon_type", columnDefinition = "icon_type_enum")
   private IconType iconType;
 
   @Column(nullable = false, name = "icon_value")
@@ -41,7 +67,8 @@ public class Wallet extends AuditableEntity {
   private String color;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(nullable = false, columnDefinition = "wallet_type_enum")
   private WalletType type;
 
   @Column(nullable = false, precision = 18, scale = 2, name = "initial_balance")
