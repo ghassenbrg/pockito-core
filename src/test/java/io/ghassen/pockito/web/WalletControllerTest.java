@@ -60,7 +60,7 @@ class WalletControllerTest {
   @WithMockUser(roles = "USER")
   void list_ShouldReturnWallets_WhenAuthenticated() throws Exception {
     // Given
-    when(walletService.list()).thenReturn(List.of(testWallet));
+    when(walletService.list(true)).thenReturn(List.of(testWallet));
 
     // When & Then
     mockMvc.perform(get(BASE_URL))
@@ -72,7 +72,7 @@ class WalletControllerTest {
       .andExpect(jsonPath("$[0].currencyCode").value(testWallet.getCurrencyCode()))
       .andExpect(jsonPath("$[0].isDefault").value(testWallet.isDefault()));
 
-    verify(walletService).list();
+    verify(walletService).list(true);
   }
 
   @Test

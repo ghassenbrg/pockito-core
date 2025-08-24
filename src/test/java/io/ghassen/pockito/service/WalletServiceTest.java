@@ -64,7 +64,7 @@ class WalletServiceTest {
       .thenReturn(List.of(wallet1, wallet2));
 
     // When
-    List<Wallet> result = walletService.list();
+    List<Wallet> result = walletService.list(true);
 
     // Then
     assertThat(result).hasSize(2);
