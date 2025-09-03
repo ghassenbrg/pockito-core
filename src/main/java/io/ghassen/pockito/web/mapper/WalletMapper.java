@@ -19,7 +19,7 @@ import java.util.List;
 @Mapper(
     componentModel = "spring",
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL
 )
 public interface WalletMapper {
 
@@ -60,6 +60,7 @@ public interface WalletMapper {
     @Mapping(target = "user.username", source = "username")
     @Mapping(target = "user", ignore = true) // User object should not be changed
     @Mapping(target = "id", ignore = true) // ID should not be changed
+    @Mapping(target = "currency", ignore = true) // Currency should not be changed
     @Mapping(target = "createdAt", ignore = true) // Audit fields are managed by the system
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "version", ignore = true)
