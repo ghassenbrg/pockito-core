@@ -35,6 +35,7 @@ public class SecurityConfig {
   JwtAuthenticationConverter jwtAuthenticationConverter() {
     var converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> KeycloakRealmRoleConverter.from(jwt));
+    converter.setPrincipalClaimName("preferred_username"); // Set the principal claim name
     return converter;
   }
 

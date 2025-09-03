@@ -2,8 +2,8 @@ package io.ghassen.pockito.domain;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.UuidGenerator;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -19,7 +19,8 @@ import lombok.experimental.SuperBuilder;
 public abstract class AuditableEntity extends AuditableEntityNoId {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  @GeneratedValue
+  @UuidGenerator
   private UUID id;
 
 }
