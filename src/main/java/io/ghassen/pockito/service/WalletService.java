@@ -59,11 +59,9 @@ public class WalletService {
                     + "' already exists for user: " + username);
         }
 
-        // Set order position if not provided
-        if (walletDto.getOrderPosition() == null) {
-            int maxOrder = walletRepository.findMaxOrderPositionByUserUsername(username);
+        // Set order position
+        int maxOrder = walletRepository.findMaxOrderPositionByUserUsername(username);
             walletDto.setOrderPosition(maxOrder + 1);
-        }
 
         // Set default flag if not provided
         if (walletDto.getIsDefault() == null) {

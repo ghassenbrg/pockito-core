@@ -3,6 +3,7 @@ package io.ghassen.pockito.web;
 import io.ghassen.pockito.domain.WalletType;
 import io.ghassen.pockito.service.WalletService;
 import io.ghassen.pockito.web.dto.WalletDto;
+import io.ghassen.pockito.web.dto.ReorderWalletsRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -196,20 +197,20 @@ public class WalletController {
     /**
      * Reorder wallets for the authenticated user.
      * 
-     * @param walletIds the list of wallet IDs in the new order
+     * @param request the reorder request containing the list of wallet IDs in the new order
      * @param authentication the authentication context
      * @return no content on success
      */
     @PostMapping("/reorder")
     public ResponseEntity<Void> reorderWallets(
-            @RequestBody List<UUID> walletIds,
+            @RequestBody @Valid ReorderWalletsRequest request,
             Authentication authentication) {
         
         String username = authentication.getName();
-        log.info("Reordering {} wallets for user: {}", walletIds.size(), username);
+        log.info("Reordering {} wallets for user: {}", request.getWalletIds().size(), username);
         
         try {
-            walletService.reorderWallets(walletIds);
+            walletService.reorderWallets(request.getWalletIds());
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             log.warn("Failed to reorder wallets: {}", e.getMessage());

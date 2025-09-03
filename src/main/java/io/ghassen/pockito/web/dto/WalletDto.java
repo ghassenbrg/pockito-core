@@ -49,9 +49,9 @@ public class WalletDto {
 
     /**
      * Initial balance of the wallet.
+     * Can be negative to represent debt or overdraft.
      */
     @NotNull(message = "Initial balance is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Initial balance must be non-negative")
     @Digits(integer = 15, fraction = 2, message = "Initial balance must have at most 15 digits and 2 decimal places")
     private BigDecimal initialBalance;
 

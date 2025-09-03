@@ -34,7 +34,6 @@ CREATE TABLE t_wallet (
     
     -- Check constraints for data validation
     CONSTRAINT chk_wallet_name_length CHECK (LENGTH(name) >= 1 AND LENGTH(name) <= 100),
-    CONSTRAINT chk_wallet_initial_balance_positive CHECK (initial_balance >= 0),
     CONSTRAINT chk_wallet_goal_amount_positive CHECK (goal_amount IS NULL OR goal_amount >= 0),
     CONSTRAINT chk_wallet_order_position_non_negative CHECK (order_position >= 0),
     CONSTRAINT chk_wallet_color_format CHECK (color IS NULL OR color ~ '^#[0-9A-Fa-f]{6}$'),
