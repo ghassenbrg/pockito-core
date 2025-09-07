@@ -140,4 +140,34 @@ public class UserService {
                     }
                 });
     }
+
+    /**
+     * Create system user if it doesn't exist.
+     * This method is called during application startup to ensure the system user exists.
+     * 
+     * @return the system user (existing or newly created)
+     */
+    @Transactional
+    public User createSystemUserIfNotExists() {
+        final String systemUsername = "system";
+        
+        // Check if system user already exists
+        Optional<User> existingSystemUser = userRepository.findByUsername(systemUsername);
+        if (existingSystemUser.isPresent()) {
+            log.debug("System user already exists");
+            return existingSystemUser.get();
+        }
+
+        // Create system user
+        log.info("Creating system user");
+        User systemUser = User.builder()
+                .username(systemUsername)
+                .systemAction(true) // Mark as system action for audit trail
+                .build();
+        
+        User savedSystemUser = userRepository.save(systemUser);
+        log.info("Successfully created system user");
+        
+        return savedSystemUser;
+    }
 }
