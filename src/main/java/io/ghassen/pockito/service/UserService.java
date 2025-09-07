@@ -1,6 +1,8 @@
 package io.ghassen.pockito.service;
 
+import io.ghassen.pockito.domain.Category;
 import io.ghassen.pockito.domain.User;
+import io.ghassen.pockito.repo.CategoryRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.web.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service class for user management operations.
@@ -24,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final CategoryRepository categoryRepository;
 
     /**
      * Get or create a user based on the username from Keycloak token.
@@ -57,6 +64,9 @@ public class UserService {
         
         User savedUser = userRepository.save(newUser);
         log.info("Successfully created user with username '{}'", username);
+        
+        // Duplicate system categories for the new user
+        duplicateSystemCategoriesForUser(savedUser);
         
         return savedUser;
     }
@@ -141,33 +151,68 @@ public class UserService {
                 });
     }
 
+
     /**
-     * Create system user if it doesn't exist.
-     * This method is called during application startup to ensure the system user exists.
+     * Duplicate all system categories for a new user.
+     * This method creates copies of all categories owned by the "system" user
+     * and assigns them to the new user, maintaining the hierarchical structure.
      * 
-     * @return the system user (existing or newly created)
+     * @param newUser the user to create categories for
      */
     @Transactional
-    public User createSystemUserIfNotExists() {
+    public void duplicateSystemCategoriesForUser(User newUser) {
         final String systemUsername = "system";
+        log.info("Duplicating system categories for new user: {}", newUser.getUsername());
         
-        // Check if system user already exists
-        Optional<User> existingSystemUser = userRepository.findByUsername(systemUsername);
-        if (existingSystemUser.isPresent()) {
-            log.debug("System user already exists");
-            return existingSystemUser.get();
+        // Get all system categories in hierarchical order (parents first)
+        List<Category> systemCategories = categoryRepository.findHierarchicalCategoriesByUserUsername(systemUsername);
+        
+        if (systemCategories.isEmpty()) {
+            log.warn("No system categories found for user: {}", systemUsername);
+            return;
         }
-
-        // Create system user
-        log.info("Creating system user");
-        User systemUser = User.builder()
-                .username(systemUsername)
-                .systemAction(true) // Mark as system action for audit trail
-                .build();
         
-        User savedSystemUser = userRepository.save(systemUser);
-        log.info("Successfully created system user");
+        // Map to track original category ID -> new category ID for parent relationships
+        Map<UUID, UUID> categoryIdMapping = new HashMap<>();
         
-        return savedSystemUser;
+        // First pass: Create all categories without parent relationships
+        for (Category systemCategory : systemCategories) {
+            Category newCategory = Category.builder()
+                    .user(newUser)
+                    .name(systemCategory.getName())
+                    .color(systemCategory.getColor())
+                    .categoryType(systemCategory.getCategoryType())
+                    .iconUrl(systemCategory.getIconUrl())
+                    .parentCategory(null) // Will be set in second pass
+                    .systemAction(true) // Mark as system action for audit trail
+                    .build();
+            
+            Category savedCategory = categoryRepository.save(newCategory);
+            categoryIdMapping.put(systemCategory.getId(), savedCategory.getId());
+            
+            log.debug("Created category '{}' for user '{}'", systemCategory.getName(), newUser.getUsername());
+        }
+        
+        // Second pass: Update parent relationships
+        for (Category systemCategory : systemCategories) {
+            if (systemCategory.getParentCategory() != null) {
+                UUID newParentId = categoryIdMapping.get(systemCategory.getParentCategory().getId());
+                UUID newCategoryId = categoryIdMapping.get(systemCategory.getId());
+                
+                if (newParentId != null && newCategoryId != null) {
+                    Category newCategory = categoryRepository.findById(newCategoryId).orElse(null);
+                    Category newParentCategory = categoryRepository.findById(newParentId).orElse(null);
+                    
+                    if (newCategory != null && newParentCategory != null) {
+                        newCategory.setParentCategory(newParentCategory);
+                        categoryRepository.save(newCategory);
+                        log.debug("Set parent relationship for category '{}'", systemCategory.getName());
+                    }
+                }
+            }
+        }
+        
+        log.info("Successfully duplicated {} system categories for user: {}", 
+                systemCategories.size(), newUser.getUsername());
     }
 }
