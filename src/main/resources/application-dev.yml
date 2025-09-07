@@ -25,13 +25,102 @@ spring:
 # Logging Configuration for Development
 logging:
   level:
+    # Root logging level
+    root: INFO
+    
+    # Application specific logging
+    io.ghassen.pockito: DEBUG
+    
+    # Spring Framework logging
+    org.springframework: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
-    com.pockito: DEBUG
-    org.springdoc: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: DEBUG
+    
+    # Spring Boot logging
+    org.springframework.boot: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.boot.context.embedded: DEBUG
+    
+    # Spring Data JPA/Hibernate logging
+    org.springframework.data.jpa: DEBUG
+    org.springframework.orm.jpa: DEBUG
+    org.hibernate: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
+    org.hibernate.engine.transaction: DEBUG
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: DEBUG
+    
+    # Database connection logging
+    org.springframework.jdbc: DEBUG
+    org.springframework.jdbc.core: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
+    
+    # Security logging
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.jwt: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.security.web.authentication: DEBUG
+    org.springframework.security.web.access: DEBUG
+    org.springframework.security.web.access.intercept: DEBUG
+    
+    # Keycloak logging
+    org.keycloak: DEBUG
+    
+    # OpenAPI/Swagger logging
+    org.springdoc: DEBUG
+    
+    # Flyway logging
+    org.flywaydb: DEBUG
+    
+    # HTTP client logging
+    org.apache.http: DEBUG
+    org.apache.http.wire: DEBUG
+    org.apache.http.headers: DEBUG
+    
+    # Jackson JSON processing
+    com.fasterxml.jackson: DEBUG
+    
+    # Validation logging
+    org.springframework.validation: DEBUG
+    org.springframework.web.bind.MethodArgumentNotValidException: DEBUG
+    
+    # CORS logging
+    org.springframework.web.cors: DEBUG
+    
+    # Actuator logging
+    org.springframework.boot.actuate: DEBUG
+    
+    # MapStruct logging
+    org.mapstruct: DEBUG
+    
+    # Tomcat logging
+    org.apache.catalina: DEBUG
+    org.apache.coyote: DEBUG
+    org.apache.tomcat: DEBUG
+    
+    # Connection pool logging
+    com.zaxxer.hikari: DEBUG
+    
+  # Logging pattern configuration
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n"
+  
+  # File logging configuration
+  file:
+    name: logs/pockito-dev.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 1GB
+  
+  # Console logging configuration
+  console:
+    enabled: true
 
 # Development-specific settings
 server:

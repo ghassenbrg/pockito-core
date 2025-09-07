@@ -135,9 +135,17 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @param categoryType the category type to filter by
      * @return list of categories of the specified type in hierarchical order
      */
-    @Query("SELECT c FROM Category c WHERE c.user.username = :username AND c.categoryType = :categoryType " +
-           "ORDER BY CASE WHEN c.parentCategory IS NULL THEN 0 ELSE 1 END, " +
-           "c.parentCategory.name, c.name")
+    @Query("""
+       SELECT c
+       FROM Category c
+       LEFT JOIN c.parentCategory pc
+       WHERE c.user.username = :username
+         AND c.categoryType = :categoryType
+       ORDER BY
+         CASE WHEN pc IS NULL THEN 0 ELSE 1 END,
+         pc.name,
+         c.name
+     """)
     List<Category> findHierarchicalCategoriesByUserUsernameAndType(
         @Param("username") String username, 
         @Param("categoryType") CategoryType categoryType);

@@ -68,9 +68,97 @@ management:
 # Logging Configuration
 logging:
   level:
+    # Root logging level
     root: ${LOGGING_LEVEL_ROOT:INFO}
-    org.springframework.security: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY:DEBUG}
-    org.springframework.web: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB:DEBUG}
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: ${LOGGING_LEVEL_REQUEST_MAPPING:TRACE}
+    
+    # Application specific logging
     io.ghassen.pockito: ${LOGGING_LEVEL_IO_GHASSEN_POCKITO:DEBUG}
-    org.springdoc: ${LOGGING_LEVEL_ORG_SPRINGDOC:DEBUG}
+    
+    # Spring Framework logging
+    org.springframework: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK:INFO}
+    org.springframework.security: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY:INFO}
+    org.springframework.web: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB:INFO}
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: ${LOGGING_LEVEL_REQUEST_MAPPING:INFO}
+    org.springframework.web.servlet.DispatcherServlet: ${LOGGING_LEVEL_DISPATCHER_SERVLET:INFO}
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter: ${LOGGING_LEVEL_REQUEST_MAPPING_HANDLER_ADAPTER:INFO}
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ${LOGGING_LEVEL_EXCEPTION_HANDLER:INFO}
+    
+    # Spring Boot logging
+    org.springframework.boot: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_BOOT:INFO}
+    org.springframework.boot.autoconfigure: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_BOOT_AUTOCONFIGURE:INFO}
+    
+    # Spring Data JPA/Hibernate logging
+    org.springframework.data.jpa: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_DATA_JPA:INFO}
+    org.springframework.orm.jpa: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_ORM_JPA:INFO}
+    org.hibernate: ${LOGGING_LEVEL_ORG_HIBERNATE:INFO}
+    org.hibernate.SQL: ${LOGGING_LEVEL_ORG_HIBERNATE_SQL:INFO}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOGGING_LEVEL_ORG_HIBERNATE_BASIC_BINDER:INFO}
+    org.hibernate.type.descriptor.sql.BasicExtractor: ${LOGGING_LEVEL_ORG_HIBERNATE_BASIC_EXTRACTOR:INFO}
+    org.hibernate.engine.transaction: ${LOGGING_LEVEL_ORG_HIBERNATE_ENGINE_TRANSACTION:INFO}
+    
+    # Database connection logging
+    org.springframework.jdbc: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_JDBC:INFO}
+    org.springframework.jdbc.core: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_JDBC_CORE:INFO}
+    org.springframework.jdbc.datasource: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_JDBC_DATASOURCE:INFO}
+    
+    # Security logging
+    org.springframework.security.oauth2: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_OAUTH2:INFO}
+    org.springframework.security.oauth2.jwt: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_OAUTH2_JWT:INFO}
+    org.springframework.security.web: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_WEB:INFO}
+    org.springframework.security.web.authentication: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_WEB_AUTHENTICATION:INFO}
+    org.springframework.security.web.access: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_WEB_ACCESS:INFO}
+    org.springframework.security.web.access.intercept: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_WEB_ACCESS_INTERCEPT:INFO}
+    
+    # Keycloak logging
+    org.keycloak: ${LOGGING_LEVEL_ORG_KEYCLOAK:INFO}
+    
+    # OpenAPI/Swagger logging
+    org.springdoc: ${LOGGING_LEVEL_ORG_SPRINGDOC:INFO}
+    
+    # Flyway logging
+    org.flywaydb: ${LOGGING_LEVEL_ORG_FLYWAYDB:INFO}
+    
+    # HTTP client logging
+    org.apache.http: ${LOGGING_LEVEL_ORG_APACHE_HTTP:INFO}
+    org.apache.http.wire: ${LOGGING_LEVEL_ORG_APACHE_HTTP_WIRE:INFO}
+    org.apache.http.headers: ${LOGGING_LEVEL_ORG_APACHE_HTTP_HEADERS:INFO}
+    
+    # Jackson JSON processing
+    com.fasterxml.jackson: ${LOGGING_LEVEL_COM_Fasterxml_JACKSON:INFO}
+    
+    # Validation logging
+    org.springframework.validation: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_VALIDATION:INFO}
+    org.springframework.web.bind.MethodArgumentNotValidException: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_BIND_METHOD_ARGUMENT_NOT_VALID_EXCEPTION:INFO}
+    
+    # CORS logging
+    org.springframework.web.cors: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_CORS:INFO}
+    
+    # Actuator logging
+    org.springframework.boot.actuate: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_BOOT_ACTUATE:INFO}
+    
+    # MapStruct logging
+    org.mapstruct: ${LOGGING_LEVEL_ORG_MAPSTRUCT:INFO}
+    
+    # Tomcat logging
+    org.apache.catalina: ${LOGGING_LEVEL_ORG_APACHE_CATALINA:INFO}
+    org.apache.coyote: ${LOGGING_LEVEL_ORG_APACHE_COYOTE:INFO}
+    org.apache.tomcat: ${LOGGING_LEVEL_ORG_APACHE_TOMCAT:INFO}
+    
+    # Connection pool logging
+    com.zaxxer.hikari: ${LOGGING_LEVEL_COM_ZAXXER_HIKARI:INFO}
+  
+  # Logging pattern configuration
+  pattern:
+    console: ${LOGGING_PATTERN_CONSOLE:%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n}
+    file: ${LOGGING_PATTERN_FILE:%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] - %msg%n}
+  
+  # File logging configuration
+  file:
+    name: ${LOGGING_FILE_NAME:logs/pockito.log}
+    max-size: ${LOGGING_FILE_MAX_SIZE:100MB}
+    max-history: ${LOGGING_FILE_MAX_HISTORY:30}
+    total-size-cap: ${LOGGING_FILE_TOTAL_SIZE_CAP:1GB}
+  
+  # Console logging configuration
+  console:
+    enabled: ${LOGGING_CONSOLE_ENABLED:true}
