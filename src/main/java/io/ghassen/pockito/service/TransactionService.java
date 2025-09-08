@@ -48,13 +48,14 @@ public class TransactionService {
      * 
      * @param transactionDto the transaction data to create
      * @return the created transaction DTO
-     * @throws IllegalArgumentException if validation fails or related entities not found
+     * @throws IllegalArgumentException if validation fails or related entities not
+     *                                  found
      */
     public TransactionDto createTransaction(TransactionDto transactionDto) {
         // Automatically set username from authenticated user
         String username = SecurityUtils.getCurrentUserId();
         transactionDto.setUsername(username);
-        
+
         log.info("Creating transaction for user: {}", username);
 
         // Validate and set related entities
@@ -70,16 +71,18 @@ public class TransactionService {
     /**
      * Update an existing transaction for the authenticated user.
      * 
-     * @param transactionId the transaction ID to update
+     * @param transactionId  the transaction ID to update
      * @param transactionDto the updated transaction data
      * @return the updated transaction DTO
-     * @throws IllegalArgumentException if transaction not found, not owned by user, or validation fails
+     * @throws IllegalArgumentException if transaction not found, not owned by user,
+     *                                  or validation fails
      */
     public TransactionDto updateTransaction(UUID transactionId, TransactionDto transactionDto) {
-        // Automatically set username from authenticated user and prevent username updates
+        // Automatically set username from authenticated user and prevent username
+        // updates
         String username = SecurityUtils.getCurrentUserId();
         transactionDto.setUsername(username);
-        
+
         log.info("Updating transaction with ID: {} for user: {}", transactionId, username);
 
         // Find existing transaction and verify ownership
@@ -107,17 +110,17 @@ public class TransactionService {
     public Optional<TransactionDto> getTransactionById(UUID transactionId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting transaction with ID: {} for user: {}", transactionId, username);
-        
+
         Optional<TransactionDto> transactionDto = transactionRepository.findById(transactionId)
                 .filter(transaction -> transaction.getUser().getUsername().equals(username))
                 .map(transactionMapper::toDto);
-        
+
         if (transactionDto.isPresent()) {
             log.info("Retrieved transaction with ID: {} for user: {}", transactionId, username);
         } else {
             log.info("Transaction with ID: {} not found or access denied for user: {}", transactionId, username);
         }
-        
+
         return transactionDto;
     }
 
@@ -125,7 +128,8 @@ public class TransactionService {
      * Delete a transaction for the authenticated user.
      * 
      * @param transactionId the transaction ID to delete
-     * @throws IllegalArgumentException if transaction not found or not owned by user
+     * @throws IllegalArgumentException if transaction not found or not owned by
+     *                                  user
      */
     public void deleteTransaction(UUID transactionId) {
         String username = SecurityUtils.getCurrentUserId();
@@ -142,11 +146,11 @@ public class TransactionService {
     /**
      * Get transactions for the authenticated user with filtering and pagination.
      * 
-     * @param walletId optional wallet ID to filter by
-     * @param startDate optional start date for date range filtering
-     * @param endDate optional end date for date range filtering
+     * @param walletId        optional wallet ID to filter by
+     * @param startDate       optional start date for date range filtering
+     * @param endDate         optional end date for date range filtering
      * @param transactionType optional transaction type to filter by
-     * @param pageable pagination information
+     * @param pageable        pagination information
      * @return page of transaction DTOs matching the criteria
      */
     @Transactional(readOnly = true)
@@ -156,9 +160,9 @@ public class TransactionService {
             LocalDate endDate,
             TransactionType transactionType,
             Pageable pageable) {
-        
+
         String username = SecurityUtils.getCurrentUserId();
-        log.debug("Getting transactions for user: {} with filters - walletId: {}, startDate: {}, endDate: {}, type: {}", 
+        log.debug("Getting transactions for user: {} with filters - walletId: {}, startDate: {}, endDate: {}, type: {}",
                 username, walletId, startDate, endDate, transactionType);
 
         // If walletId is provided, verify the wallet belongs to the user
@@ -172,11 +176,11 @@ public class TransactionService {
                 username, walletId, startDate, endDate, transactionType, pageable);
 
         Page<TransactionDto> transactionDtos = transactions.map(transactionMapper::toDto);
-        
-        log.info("Retrieved {} transactions for user: {} (page {}/{})", 
-                transactionDtos.getNumberOfElements(), username, 
+
+        log.info("Retrieved {} transactions for user: {} (page {}/{})",
+                transactionDtos.getNumberOfElements(), username,
                 pageable.getPageNumber() + 1, transactionDtos.getTotalPages());
-        
+
         return transactionDtos;
     }
 
@@ -189,10 +193,10 @@ public class TransactionService {
     public List<TransactionDto> getAllUserTransactions() {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting all transactions for user: {}", username);
-        
+
         List<Transaction> transactions = transactionRepository.findByUserUsernameOrderByEffectiveDateDesc(username);
         List<TransactionDto> transactionDtos = transactionMapper.toDtoList(transactions);
-        
+
         log.info("Retrieved {} transactions for user: {}", transactionDtos.size(), username);
         return transactionDtos;
     }
@@ -205,6 +209,12 @@ public class TransactionService {
      * @throws IllegalArgumentException if validation fails
      */
     private Transaction validateAndBuildTransaction(TransactionDto transactionDto) {
+
+        // Validate that the username in the DTO matches the authenticated user
+        String currentUser = SecurityUtils.getCurrentUserId();
+        if (transactionDto.getUsername() != null && !transactionDto.getUsername().equals(currentUser)) {
+            throw new IllegalArgumentException("Username in transaction does not match the authenticated user");
+        }
         // Validate user exists
         User user = userRepository.findById(transactionDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + transactionDto.getUsername()));
@@ -228,7 +238,7 @@ public class TransactionService {
     /**
      * Validate and update existing transaction entity.
      * 
-     * @param transactionDto the transaction DTO with update data
+     * @param transactionDto      the transaction DTO with update data
      * @param existingTransaction the existing transaction entity to update
      * @throws IllegalArgumentException if validation fails
      */
@@ -254,7 +264,7 @@ public class TransactionService {
      */
     private void validateTransactionTypeRules(TransactionDto transactionDto) {
         TransactionType type = transactionDto.getTransactionType();
-        
+
         switch (type) {
             case EXPENSE:
                 if (transactionDto.getWalletFromId() == null) {
@@ -264,7 +274,7 @@ public class TransactionService {
                     throw new IllegalArgumentException("EXPENSE transactions must have walletTo set to NULL");
                 }
                 break;
-                
+
             case INCOME:
                 if (transactionDto.getWalletToId() == null) {
                     throw new IllegalArgumentException("INCOME transactions require walletTo to be set");
@@ -273,13 +283,14 @@ public class TransactionService {
                     throw new IllegalArgumentException("INCOME transactions must have walletFrom set to NULL");
                 }
                 break;
-                
+
             case TRANSFER:
                 if (transactionDto.getWalletFromId() == null && transactionDto.getWalletToId() == null) {
-                    throw new IllegalArgumentException("TRANSFER transactions require at least one of walletFrom or walletTo to be set");
+                    throw new IllegalArgumentException(
+                            "TRANSFER transactions require at least one of walletFrom or walletTo to be set");
                 }
                 break;
-                
+
             default:
                 throw new IllegalArgumentException("Invalid transaction type: " + type);
         }
@@ -288,9 +299,10 @@ public class TransactionService {
     /**
      * Set related entities (wallets and category) for the transaction.
      * 
-     * @param transaction the transaction entity
+     * @param transaction    the transaction entity
      * @param transactionDto the transaction DTO
-     * @throws IllegalArgumentException if related entities not found or not owned by user
+     * @throws IllegalArgumentException if related entities not found or not owned
+     *                                  by user
      */
     private void setRelatedEntities(Transaction transaction, TransactionDto transactionDto) {
         String username = transactionDto.getUsername();
@@ -322,7 +334,8 @@ public class TransactionService {
 
     /**
      * Set exchange rate based on wallet currencies.
-     * If both wallets have the same currency, or if one wallet is NULL, then exchangeRate = 1.
+     * If both wallets have the same currency, or if one wallet is NULL, then
+     * exchangeRate = 1.
      * Otherwise, use the provided exchange rate.
      * 
      * @param transaction the transaction entity
@@ -331,9 +344,10 @@ public class TransactionService {
         Wallet walletFrom = transaction.getWalletFrom();
         Wallet walletTo = transaction.getWalletTo();
 
-        // If both wallets have the same currency, or if one wallet is NULL, then exchangeRate = 1
-        if (walletFrom == null || walletTo == null || 
-            walletFrom.getCurrency().equals(walletTo.getCurrency())) {
+        // If both wallets have the same currency, or if one wallet is NULL, then
+        // exchangeRate = 1
+        if (walletFrom == null || walletTo == null ||
+                walletFrom.getCurrency().equals(walletTo.getCurrency())) {
             transaction.setExchangeRate(BigDecimal.ONE);
         }
         // Otherwise, keep the provided exchange rate (already set in DTO)
