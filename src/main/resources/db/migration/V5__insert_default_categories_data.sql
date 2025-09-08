@@ -55,13 +55,13 @@ VALUES
     ('Delivery',      'EXPENSE', '#F58A80', 'https://img.icons8.com/color/96/delivery.png', 'Food & Dining'),
 
     -- EXPENSE: Entertainment
-    ('Entertainment', 'EXPENSE', '#A46BF5', 'https://img.icons8.com/color/96/party-balloons.png', NULL),
+    ('Entertainment', 'EXPENSE', '#A46BF5', 'https://img.icons8.com/?size=100&id=Kh9KJFNHDnTA&format=png&color=000000', NULL),
     ('Streaming',     'EXPENSE', '#BE90FF', 'https://img.icons8.com/color/96/tv.png', 'Entertainment'),
     ('Movies & Events','EXPENSE','#BE90FF', 'https://img.icons8.com/color/96/ticket.png', 'Entertainment'),
     ('Games',         'EXPENSE', '#BE90FF', 'https://img.icons8.com/color/96/controller.png', 'Entertainment'),
 
     -- EXPENSE: Health
-    ('Health',        'EXPENSE', '#2ECC71', 'https://img.icons8.com/color/96/first-aid-kit.png', NULL),
+    ('Health',        'EXPENSE', '#2ECC71', 'https://img.icons8.com/?size=100&id=AjSTXy58YYuf&format=png&color=000000', NULL),
     ('Pharmacy',      'EXPENSE', '#71D79A', 'https://img.icons8.com/color/96/pill.png', 'Health'),
     ('Doctor',        'EXPENSE', '#71D79A', 'https://img.icons8.com/color/96/doctor-male.png', 'Health'),
     ('Insurance',     'EXPENSE', '#71D79A', 'https://img.icons8.com/color/96/insurance-agent.png', 'Health'),
@@ -74,7 +74,7 @@ VALUES
 
     -- EXPENSE: Travel
     ('Travel',        'EXPENSE', '#FF8C42', 'https://img.icons8.com/color/96/airplane-take-off.png', NULL),
-    ('Flights',       'EXPENSE', '#FFB27E', 'https://img.icons8.com/color/96/airplane.png', 'Travel'),
+    ('Flights',       'EXPENSE', '#FFB27E', 'https://img.icons8.com/color/96/airport.png', 'Travel'),
     ('Hotels',        'EXPENSE', '#FFB27E', 'https://img.icons8.com/color/96/5-star-hotel.png', 'Travel'),
     ('Activities',    'EXPENSE', '#FFB27E', 'https://img.icons8.com/color/96/beach.png', 'Travel'),
 
@@ -93,7 +93,6 @@ VALUES
     ('Income',        'INCOME',  '#27AE60', 'https://img.icons8.com/color/96/money-bag.png', NULL),
     ('Salary',        'INCOME',  '#56D27E', 'https://img.icons8.com/color/96/money.png', 'Income'),
     ('Bonus',         'INCOME',  '#56D27E', 'https://img.icons8.com/color/96/money-transfer.png', 'Income'),
-    ('Interest',      'INCOME',  '#56D27E', 'https://img.icons8.com/color/96/interest-rate.png', 'Income'),
     ('Dividends',     'INCOME',  '#56D27E', 'https://img.icons8.com/color/96/stocks.png', 'Income'),
     ('Refunds & Reimbursements','INCOME','#56D27E','https://img.icons8.com/color/96/refund-2.png','Income'),
     ('Other Income',  'INCOME',  '#56D27E', 'https://img.icons8.com/color/96/money-bag-euro.png', 'Income');
