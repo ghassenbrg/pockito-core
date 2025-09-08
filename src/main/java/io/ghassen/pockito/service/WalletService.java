@@ -338,15 +338,11 @@ public class WalletService {
      */
     private void setDerivedFields(WalletDto walletDto, Wallet wallet) {
         // Calculate current balance based on transactions
-        if (walletDto.getBalance() == null) {
-            BigDecimal currentBalance = calculateCurrentBalance(wallet);
-            walletDto.setBalance(currentBalance);
-        }
-        
+        BigDecimal currentBalance = calculateCurrentBalance(wallet);
+        walletDto.setBalance(currentBalance);
+
         // Set active based on archivedAt (true if not archived, false if archived)
-        if (walletDto.getActive() == null) {
-            walletDto.setActive(wallet.getArchivedAt() == null);
-        }
+        walletDto.setActive(wallet.getArchivedAt() == null);
     }
 
     /**
