@@ -1,12 +1,16 @@
 package io.ghassen.pockito.repo;
 
 import io.ghassen.pockito.domain.Transaction;
+import io.ghassen.pockito.domain.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -96,4 +100,79 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      */
     @Query("SELECT COUNT(t) > 0 FROM Transaction t WHERE t.walletFrom.id = :walletId OR t.walletTo.id = :walletId")
     boolean hasTransactions(@Param("walletId") UUID walletId);
+
+    /**
+     * Find transactions for a specific user with pagination and filtering.
+     * 
+     * @param username the username to filter by
+     * @param walletId optional wallet ID to filter by (can be null)
+     * @param startDate optional start date for date range filtering (can be null)
+     * @param endDate optional end date for date range filtering (can be null)
+     * @param transactionType optional transaction type to filter by (can be null)
+     * @param pageable pagination information
+     * @return page of transactions matching the criteria
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.user.username = :username " +
+           "AND (:walletId IS NULL OR t.walletFrom.id = :walletId OR t.walletTo.id = :walletId) " +
+           "AND (:startDate IS NULL OR t.effectiveDate >= :startDate) " +
+           "AND (:endDate IS NULL OR t.effectiveDate <= :endDate) " +
+           "AND (:transactionType IS NULL OR t.transactionType = :transactionType) " +
+           "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
+    Page<Transaction> findByUserWithFilters(
+            @Param("username") String username,
+            @Param("walletId") UUID walletId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("transactionType") TransactionType transactionType,
+            Pageable pageable);
+
+    /**
+     * Find transactions for a specific user and wallet with pagination.
+     * 
+     * @param username the username to filter by
+     * @param walletId the wallet ID to filter by
+     * @param pageable pagination information
+     * @return page of transactions involving the specified wallet
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.user.username = :username " +
+           "AND (t.walletFrom.id = :walletId OR t.walletTo.id = :walletId) " +
+           "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
+    Page<Transaction> findByUserAndWalletWithPagination(
+            @Param("username") String username,
+            @Param("walletId") UUID walletId,
+            Pageable pageable);
+
+    /**
+     * Find transactions for a specific user with date range filtering and pagination.
+     * 
+     * @param username the username to filter by
+     * @param startDate the start date for date range filtering
+     * @param endDate the end date for date range filtering
+     * @param pageable pagination information
+     * @return page of transactions within the date range
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.user.username = :username " +
+           "AND t.effectiveDate >= :startDate AND t.effectiveDate <= :endDate " +
+           "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
+    Page<Transaction> findByUserAndDateRange(
+            @Param("username") String username,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable);
+
+    /**
+     * Find transactions for a specific user by transaction type with pagination.
+     * 
+     * @param username the username to filter by
+     * @param transactionType the transaction type to filter by
+     * @param pageable pagination information
+     * @return page of transactions of the specified type
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.user.username = :username " +
+           "AND t.transactionType = :transactionType " +
+           "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
+    Page<Transaction> findByUserAndTransactionType(
+            @Param("username") String username,
+            @Param("transactionType") TransactionType transactionType,
+            Pageable pageable);
 }
