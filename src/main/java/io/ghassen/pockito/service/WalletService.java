@@ -1,5 +1,6 @@
 package io.ghassen.pockito.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
 import io.ghassen.pockito.domain.WalletType;
+import io.ghassen.pockito.repo.TransactionRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.repo.WalletRepository;
 import io.ghassen.pockito.security.SecurityUtils;
@@ -33,6 +35,7 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final UserRepository userRepository;
     private final WalletMapper walletMapper;
+    private final TransactionRepository transactionRepository;
 
     /**
      * Create a new wallet for the authenticated user.
@@ -334,14 +337,37 @@ public class WalletService {
      * @param wallet the wallet entity to get archivedAt information from
      */
     private void setDerivedFields(WalletDto walletDto, Wallet wallet) {
-        // Set balance to initial balance for now (later will be calculated from transactions)
+        // Calculate current balance based on transactions
         if (walletDto.getBalance() == null) {
-            walletDto.setBalance(wallet.getInitialBalance());
+            BigDecimal currentBalance = calculateCurrentBalance(wallet);
+            walletDto.setBalance(currentBalance);
         }
         
         // Set active based on archivedAt (true if not archived, false if archived)
         if (walletDto.getActive() == null) {
             walletDto.setActive(wallet.getArchivedAt() == null);
+        }
+    }
+
+    /**
+     * Calculate the current balance of a wallet based on transactions.
+     * Uses the repository method to calculate balance in a single database query.
+     * 
+     * @param wallet the wallet to calculate balance for
+     * @return the current balance of the wallet
+     */
+    private BigDecimal calculateCurrentBalance(Wallet wallet) {
+        try {
+            BigDecimal currentBalance = transactionRepository.calculateCurrentBalance(wallet.getId());
+            
+            log.debug("Calculated balance for wallet {}: initial={}, current={}", 
+                    wallet.getId(), wallet.getInitialBalance(), currentBalance);
+            
+            return currentBalance;
+        } catch (Exception e) {
+            log.warn("Error calculating balance for wallet {}, falling back to initial balance: {}", 
+                    wallet.getId(), e.getMessage());
+            return wallet.getInitialBalance();
         }
     }
 
