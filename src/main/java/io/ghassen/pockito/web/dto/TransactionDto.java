@@ -124,4 +124,16 @@ public class TransactionDto {
      * Populated automatically from category entity.
      */
     private String categoryName;
+
+    /**
+     * Currency code of the source wallet (for display purposes).
+     * Populated automatically from walletFrom entity.
+     */
+    private String walletFromCurrency;
+
+    /**
+     * Currency code of the destination wallet (for display purposes).
+     * Populated automatically from walletTo entity.
+     */
+    private String walletToCurrency;
 }
