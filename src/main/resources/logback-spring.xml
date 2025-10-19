@@ -22,6 +22,8 @@
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
+        <!-- Ignore errors if file cannot be created -->
+        <prudent>false</prudent>
     </appender>
     
     <!-- Separate file appender for SQL queries -->
@@ -36,6 +38,8 @@
             <maxHistory>7</maxHistory>
             <totalSizeCap>500MB</totalSizeCap>
         </rollingPolicy>
+        <!-- Ignore errors if file cannot be created -->
+        <prudent>false</prudent>
     </appender>
     
     <!-- Separate file appender for security logs -->
@@ -50,6 +54,8 @@
             <maxHistory>30</maxHistory>
             <totalSizeCap>500MB</totalSizeCap>
         </rollingPolicy>
+        <!-- Ignore errors if file cannot be created -->
+        <prudent>false</prudent>
     </appender>
     
     <!-- Separate file appender for application logs -->
@@ -64,6 +70,8 @@
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
+        <!-- Ignore errors if file cannot be created -->
+        <prudent>false</prudent>
     </appender>
     
     <!-- Development profile configuration -->
@@ -154,7 +162,31 @@
     
     <!-- Production profile configuration -->
     <springProfile name="prod">
+        <!-- Application logging with fallback to console if file fails -->
+        <logger name="io.ghassen.pockito" level="INFO" additivity="false">
+            <appender-ref ref="APP_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        
+        <!-- Security logging -->
+        <logger name="org.springframework.security" level="WARN" additivity="false">
+            <appender-ref ref="SECURITY_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        
+        <logger name="org.springframework.security.oauth2" level="WARN" additivity="false">
+            <appender-ref ref="SECURITY_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        
+        <logger name="org.keycloak" level="WARN" additivity="false">
+            <appender-ref ref="SECURITY_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        
+        <!-- Root logger for production - console as primary, file as secondary -->
         <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>

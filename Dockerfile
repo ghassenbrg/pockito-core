@@ -35,6 +35,10 @@ RUN addgroup -g 1001 -S pockito && \
 # Set working directory
 WORKDIR /app
 
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && \
+    chown -R pockito:pockito /app/logs
+
 # Copy the built JAR from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
