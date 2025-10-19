@@ -31,6 +31,15 @@ spring:
     locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
     baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:true}
   
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    # This format applies to Instant and other date-time types
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+    time-zone: UTC
+    # LocalDate will be serialized as yyyy-MM-dd by default
+
   # Security Configuration
   security:
     oauth2:

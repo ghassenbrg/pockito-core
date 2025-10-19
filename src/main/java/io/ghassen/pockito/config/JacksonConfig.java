@@ -22,6 +22,9 @@ public class JacksonConfig {
         // Pretty print JSON (useful for debugging)
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         
+        // Disable writing dates as timestamps to ensure ISO format
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        
         // Register Java 8 time module
         mapper.registerModule(new JavaTimeModule());
         

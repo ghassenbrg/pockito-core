@@ -22,6 +22,15 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  # Jackson Configuration for Production
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    # This format applies to Instant and other date-time types
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSXXX
+    time-zone: UTC
+    # LocalDate will be serialized as yyyy-MM-dd by default
+
 # Logging Configuration for Production
 logging:
   level:
