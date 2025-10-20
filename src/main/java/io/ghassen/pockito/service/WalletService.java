@@ -171,6 +171,9 @@ public class WalletService {
 
         walletDto.setOrderPosition(existingWallet.getOrderPosition());
         
+        // Currency should not be updated
+        existingWallet.setCurrency(walletDto.getCurrency());
+
         // Update entity with new data
         walletMapper.updateEntityFromDto(walletDto, existingWallet);
 

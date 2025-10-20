@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -166,7 +167,7 @@ public class TransactionController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @Parameter(description = "Transaction type to filter by") 
             @RequestParam(required = false) TransactionType transactionType,
-            @PageableDefault(size = 20, sort = "effectiveDate") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "effectiveDate", direction = Sort.Direction.DESC) Pageable pageable) {
         
         log.debug("Listing transactions with filters - walletId: {}, startDate: {}, endDate: {}, type: {}", 
                 walletId, startDate, endDate, transactionType);
@@ -216,7 +217,7 @@ public class TransactionController {
     public ResponseEntity<Page<TransactionDto>> getTransactionsByWallet(
             @Parameter(description = "Wallet ID to filter by") 
             @PathVariable UUID walletId,
-            @PageableDefault(size = 20, sort = "effectiveDate") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "effectiveDate", direction = Sort.Direction.DESC) Pageable pageable) {
         
         log.debug("Getting transactions for wallet: {}", walletId);
         
@@ -249,7 +250,7 @@ public class TransactionController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @Parameter(description = "End date for date range filtering (yyyy-MM-dd)") 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 20, sort = "effectiveDate") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "effectiveDate", direction = Sort.Direction.DESC) Pageable pageable) {
         
         log.debug("Getting transactions for date range: {} to {}", startDate, endDate);
         
@@ -279,7 +280,7 @@ public class TransactionController {
     public ResponseEntity<Page<TransactionDto>> getTransactionsByType(
             @Parameter(description = "Transaction type to filter by") 
             @PathVariable TransactionType transactionType,
-            @PageableDefault(size = 20, sort = "effectiveDate") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "effectiveDate", direction = Sort.Direction.DESC) Pageable pageable) {
         
         log.debug("Getting transactions of type: {}", transactionType);
         
