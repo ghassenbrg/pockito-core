@@ -38,6 +38,7 @@ public interface TransactionMapper {
     @Mapping(source = "walletFrom.currency", target = "walletFromCurrency")
     @Mapping(source = "walletTo.currency", target = "walletToCurrency")
     @Mapping(source = "category.name", target = "categoryName")
+    @Mapping(source = "category.iconUrl", target = "iconUrl")
     @Mapping(expression = "java(transaction.getWalletToAmount())", target = "walletToAmount")
     TransactionDto toDto(Transaction transaction);
 

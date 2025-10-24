@@ -136,4 +136,11 @@ public class TransactionDto {
      * Populated automatically from walletTo entity.
      */
     private String walletToCurrency;
+
+    /**
+     * Icon URL of the category (for display purposes).
+     * Populated automatically from category entity.
+     * Null if no category is set.
+     */
+    private String iconUrl;
 }
