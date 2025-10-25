@@ -1,5 +1,10 @@
 package io.ghassen.pockito.web.dto;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import io.ghassen.pockito.domain.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -10,14 +15,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.UUID;
-
 /**
  * Data Transfer Object for Transaction entity.
  * 
- * Used for transferring transaction data between the web layer and service layer.
+ * Used for transferring transaction data between the web layer and service
+ * layer.
  * Includes validation annotations to ensure data integrity and business rules.
  */
 @Data
@@ -33,7 +35,8 @@ public class TransactionDto {
 
     /**
      * Username of the transaction owner.
-     * This field is automatically set from the authenticated user and cannot be updated.
+     * This field is automatically set from the authenticated user and cannot be
+     * updated.
      */
     private String username;
 
@@ -143,4 +146,14 @@ public class TransactionDto {
      * Null if no category is set.
      */
     private String iconUrl;
+
+    /**
+     * Creation timestamp.
+     */
+    private Instant createdAt;
+
+    /**
+     * Last update timestamp.
+     */
+    private Instant updatedAt;
 }

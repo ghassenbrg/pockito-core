@@ -1,5 +1,8 @@
 package io.ghassen.pockito.web.dto;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import io.ghassen.pockito.domain.CategoryType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,8 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 /**
  * Data Transfer Object for Category entity.
@@ -31,7 +32,8 @@ public class CategoryDto {
 
     /**
      * Username of the category owner.
-     * This field is automatically set from the authenticated user and cannot be updated.
+     * This field is automatically set from the authenticated user and cannot be
+     * updated.
      */
     private String username;
 
@@ -85,4 +87,14 @@ public class CategoryDto {
      * This is a derived field populated by the service.
      */
     private Integer childCount;
+
+    /**
+     * Creation timestamp.
+     */
+    private Instant createdAt;
+
+    /**
+     * Last update timestamp.
+     */
+    private Instant updatedAt;
 }

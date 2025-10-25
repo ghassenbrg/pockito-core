@@ -1,5 +1,9 @@
 package io.ghassen.pockito.web.dto;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+
 import io.ghassen.pockito.domain.CurrencyCode;
 import io.ghassen.pockito.domain.WalletType;
 import jakarta.validation.constraints.DecimalMin;
@@ -12,10 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.UUID;
 
 /**
  * Data Transfer Object for Wallet entity.
@@ -36,7 +36,8 @@ public class WalletDto {
 
     /**
      * Username of the wallet owner.
-     * This field is automatically set from the authenticated user and cannot be updated.
+     * This field is automatically set from the authenticated user and cannot be
+     * updated.
      */
     private String username;
 
@@ -127,13 +128,4 @@ public class WalletDto {
      */
     private Instant updatedAt;
 
-    /**
-     * Username of who created the wallet.
-     */
-    private String createdBy;
-
-    /**
-     * Username of who last updated the wallet.
-     */
-    private String updatedBy;
 }
