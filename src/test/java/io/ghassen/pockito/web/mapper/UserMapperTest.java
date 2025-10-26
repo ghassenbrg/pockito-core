@@ -1,9 +1,9 @@
 package io.ghassen.pockito.web.mapper;
 
-import io.ghassen.pockito.domain.Country;
-import io.ghassen.pockito.domain.CurrencyCode;
+import io.ghassen.pockito.domain.enums.Country;
+import io.ghassen.pockito.domain.enums.CurrencyCode;
 import io.ghassen.pockito.domain.User;
-import io.ghassen.pockito.web.dto.UserDto;
+import io.ghassen.pockito.web.types.dto.UserDto;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 

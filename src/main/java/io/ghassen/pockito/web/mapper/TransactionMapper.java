@@ -1,7 +1,9 @@
 package io.ghassen.pockito.web.mapper;
 
 import io.ghassen.pockito.domain.Transaction;
-import io.ghassen.pockito.web.dto.TransactionDto;
+import io.ghassen.pockito.web.types.dto.TransactionDto;
+import io.ghassen.pockito.web.types.request.TransactionRequest;
+import io.ghassen.pockito.web.types.response.TransactionResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -94,4 +96,28 @@ public interface TransactionMapper {
      * @return the corresponding list of entities
      */
     List<Transaction> toEntityList(List<TransactionDto> transactionDtos);
+
+    /**
+     * Convert TransactionRequest to TransactionDto.
+     * 
+     * @param transactionRequest the request to convert
+     * @return the corresponding DTO
+     */
+    TransactionDto requestToDto(TransactionRequest transactionRequest);
+
+    /**
+     * Convert TransactionDto to TransactionResponse.
+     * 
+     * @param transactionDto the DTO to convert
+     * @return the corresponding response
+     */
+    TransactionResponse dtoToResponse(TransactionDto transactionDto);
+
+    /**
+     * Convert list of TransactionDto to list of TransactionResponse.
+     * 
+     * @param transactionDtos the list of DTOs to convert
+     * @return the corresponding list of responses
+     */
+    List<TransactionResponse> dtoListToResponseList(List<TransactionDto> transactionDtos);
 }

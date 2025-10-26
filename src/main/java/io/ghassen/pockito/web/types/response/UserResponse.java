@@ -1,21 +1,25 @@
-package io.ghassen.pockito.web.dto;
+package io.ghassen.pockito.web.types.response;
 
-import io.ghassen.pockito.domain.Country;
-import io.ghassen.pockito.domain.CurrencyCode;
+import io.ghassen.pockito.domain.enums.Country;
+import io.ghassen.pockito.domain.enums.CurrencyCode;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
 /**
- * Data Transfer Object for User entity.
+ * Response DTO for User entity.
  * 
  * Used for API responses, excluding sensitive audit information
  * while providing essential user data.
  */
 @Data
 @Builder
-public class UserDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserResponse  {
 
     /**
      * User's username (primary identifier)

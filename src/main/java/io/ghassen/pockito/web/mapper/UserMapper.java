@@ -1,7 +1,8 @@
 package io.ghassen.pockito.web.mapper;
 
 import io.ghassen.pockito.domain.User;
-import io.ghassen.pockito.web.dto.UserDto;
+import io.ghassen.pockito.web.types.dto.UserDto;
+import io.ghassen.pockito.web.types.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -70,4 +71,12 @@ public interface UserMapper {
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "systemAction", ignore = true)
     void updateEntityFromDto(UserDto userDto, @org.mapstruct.MappingTarget User user);
+
+    /**
+     * Maps UserDto to UserResponse.
+     * 
+     * @param userDto the UserDto to map
+     * @return the mapped UserResponse
+     */
+    UserResponse toResponse(UserDto userDto);
 }

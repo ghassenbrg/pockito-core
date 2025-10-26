@@ -20,6 +20,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import io.ghassen.pockito.domain.enums.CategoryType;
+
 /**
  * Category entity representing a user-defined category for organizing transactions or other entities.
  * 
@@ -74,6 +76,14 @@ public class Category extends AuditableEntity {
     @NotBlank
     @Size(min = 1, max = 100)
     private String name;
+
+    /**
+     * Description of the category.
+     * Optional field with length validation.
+     */
+    @Column(name = "description", length = 500)
+    @Size(max = 500)
+    private String description;
 
     /**
      * Hex color code for the category (e.g., #A1B2C3).

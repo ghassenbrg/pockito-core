@@ -1,7 +1,7 @@
 package io.ghassen.pockito.service;
 
 import io.ghassen.pockito.domain.Category;
-import io.ghassen.pockito.domain.CategoryType;
+import io.ghassen.pockito.domain.enums.CategoryType;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.repo.CategoryRepository;
 import io.ghassen.pockito.repo.UserRepository;

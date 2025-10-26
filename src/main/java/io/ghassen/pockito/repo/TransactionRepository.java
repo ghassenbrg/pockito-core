@@ -1,7 +1,7 @@
 package io.ghassen.pockito.repo;
 
 import io.ghassen.pockito.domain.Transaction;
-import io.ghassen.pockito.domain.TransactionType;
+import io.ghassen.pockito.domain.enums.TransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
 package io.ghassen.pockito.repo;
 
 import io.ghassen.pockito.domain.Category;
-import io.ghassen.pockito.domain.CategoryType;
+import io.ghassen.pockito.domain.enums.CategoryType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

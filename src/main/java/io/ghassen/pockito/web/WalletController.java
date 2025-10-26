@@ -1,15 +1,21 @@
 package io.ghassen.pockito.web;
 
-import io.ghassen.pockito.domain.WalletType;
 import io.ghassen.pockito.service.WalletService;
-import io.ghassen.pockito.web.dto.WalletDto;
-import io.ghassen.pockito.web.dto.ReorderWalletsRequest;
+import io.ghassen.pockito.domain.enums.WalletType;
+import io.ghassen.pockito.web.types.dto.WalletDto;
+import io.ghassen.pockito.web.types.request.WalletRequest;
+import io.ghassen.pockito.web.types.request.ReorderWalletsRequest;
+import io.ghassen.pockito.web.types.response.WalletResponse;
+import io.ghassen.pockito.web.types.response.WalletListResponse;
+import io.ghassen.pockito.web.mapper.WalletMapper;
+import io.ghassen.pockito.web.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,25 +34,32 @@ import java.util.UUID;
 public class WalletController {
 
     private final WalletService walletService;
+    private final WalletMapper walletMapper;
 
     /**
      * Create a new wallet for the authenticated user.
      * 
-     * @param walletDto the wallet data to create
+     * @param walletRequest the wallet data to create
      * @param authentication the authentication context
      * @return the created wallet
      */
     @PostMapping
-    public ResponseEntity<WalletDto> createWallet(
-            @Valid @RequestBody WalletDto walletDto,
+    public ResponseEntity<WalletResponse> createWallet(
+            @Validated(ValidationGroups.Create.class) @RequestBody WalletRequest walletRequest,
             Authentication authentication) {
         
         String username = authentication.getName();
         log.info("Creating wallet for user: {}", username);
         
-        // Username is automatically set by the service from SecurityUtils
-        WalletDto createdWallet = walletService.createWallet(walletDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdWallet);
+        // Convert request to DTO for service layer
+        WalletDto walletDto = walletMapper.requestToDto(walletRequest);
+        
+        WalletDto createdWalletDto = walletService.createWallet(walletDto);
+        
+        // Convert DTO to response
+        WalletResponse walletResponse = walletMapper.dtoToResponse(createdWalletDto);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(walletResponse);
     }
 
     /**
@@ -56,12 +69,21 @@ public class WalletController {
      * @return list of user's wallets
      */
     @GetMapping
-    public ResponseEntity<List<WalletDto>> getUserWallets(Authentication authentication) {
+    public ResponseEntity<WalletListResponse> getUserWallets(Authentication authentication) {
         String username = authentication.getName();
         log.debug("Getting wallets for user: {}", username);
         
-        List<WalletDto> wallets = walletService.getUserWallets();
-        return ResponseEntity.ok(wallets);
+        List<WalletDto> walletDtos = walletService.getUserWallets();
+        
+        // Convert DTOs to responses
+        List<WalletResponse> walletResponses = walletMapper.dtoListToResponseList(walletDtos);
+        
+        WalletListResponse response = WalletListResponse.builder()
+            .wallets(walletResponses)
+            .totalCount((long) walletResponses.size())
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -72,7 +94,7 @@ public class WalletController {
      * @return the wallet if found and owned by user
      */
     @GetMapping("/{walletId}")
-    public ResponseEntity<WalletDto> getWallet(
+    public ResponseEntity<WalletResponse> getWallet(
             @PathVariable UUID walletId,
             Authentication authentication) {
         
@@ -80,6 +102,7 @@ public class WalletController {
         log.debug("Getting wallet with ID: {} for user: {}", walletId, username);
         
         return walletService.getWalletById(walletId)
+            .map(walletMapper::dtoToResponse)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -88,23 +111,29 @@ public class WalletController {
      * Update an existing wallet for the authenticated user.
      * 
      * @param walletId the wallet ID to update
-     * @param walletDto the updated wallet data
+     * @param walletRequest the updated wallet data
      * @param authentication the authentication context
      * @return the updated wallet
      */
     @PutMapping("/{walletId}")
-    public ResponseEntity<WalletDto> updateWallet(
+    public ResponseEntity<WalletResponse> updateWallet(
             @PathVariable UUID walletId,
-            @Valid @RequestBody WalletDto walletDto,
+            @Validated(ValidationGroups.Update.class) @RequestBody WalletRequest walletRequest,
             Authentication authentication) {
         
         String username = authentication.getName();
         log.info("Updating wallet with ID: {} for user: {}", walletId, username);
         
-        // Username is automatically set by the service from SecurityUtils and cannot be updated
+        // Convert request to DTO for service layer
+        WalletDto walletDto = walletMapper.requestToDto(walletRequest);
+        
         try {
-            WalletDto updatedWallet = walletService.updateWallet(walletId, walletDto);
-            return ResponseEntity.ok(updatedWallet);
+            WalletDto updatedWalletDto = walletService.updateWallet(walletId, walletDto);
+            
+            // Convert DTO to response
+            WalletResponse walletResponse = walletMapper.dtoToResponse(updatedWalletDto);
+            
+            return ResponseEntity.ok(walletResponse);
         } catch (IllegalArgumentException e) {
             log.warn("Failed to update wallet: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -143,15 +172,24 @@ public class WalletController {
      * @return list of wallets of the specified type
      */
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<WalletDto>> getWalletsByType(
+    public ResponseEntity<WalletListResponse> getWalletsByType(
             @PathVariable WalletType type,
             Authentication authentication) {
         
         String username = authentication.getName();
         log.debug("Getting wallets of type {} for user: {}", type, username);
         
-        List<WalletDto> wallets = walletService.getUserWalletsByType(type);
-        return ResponseEntity.ok(wallets);
+        List<WalletDto> walletDtos = walletService.getUserWalletsByType(type);
+        
+        // Convert DTOs to responses
+        List<WalletResponse> walletResponses = walletMapper.dtoListToResponseList(walletDtos);
+        
+        WalletListResponse response = WalletListResponse.builder()
+            .wallets(walletResponses)
+            .totalCount((long) walletResponses.size())
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -161,11 +199,12 @@ public class WalletController {
      * @return the default wallet if exists
      */
     @GetMapping("/default")
-    public ResponseEntity<WalletDto> getDefaultWallet(Authentication authentication) {
+    public ResponseEntity<WalletResponse> getDefaultWallet(Authentication authentication) {
         String username = authentication.getName();
         log.debug("Getting default wallet for user: {}", username);
         
         return walletService.getDefaultWallet()
+            .map(walletMapper::dtoToResponse)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -178,7 +217,7 @@ public class WalletController {
      * @return the updated wallet
      */
     @PostMapping("/{walletId}/set-default")
-    public ResponseEntity<WalletDto> setDefaultWallet(
+    public ResponseEntity<WalletResponse> setDefaultWallet(
             @PathVariable UUID walletId,
             Authentication authentication) {
         
@@ -186,8 +225,11 @@ public class WalletController {
         log.info("Setting wallet with ID: {} as default for user: {}", walletId, username);
         
         try {
-            WalletDto updatedWallet = walletService.setDefaultWallet(walletId);
-            return ResponseEntity.ok(updatedWallet);
+            WalletDto updatedWalletDto = walletService.setDefaultWallet(walletId);
+            
+            WalletResponse walletResponse = walletMapper.dtoToResponse(updatedWalletDto);
+            
+            return ResponseEntity.ok(walletResponse);
         } catch (IllegalArgumentException e) {
             log.warn("Failed to set default wallet: {}", e.getMessage());
             return ResponseEntity.badRequest().build();

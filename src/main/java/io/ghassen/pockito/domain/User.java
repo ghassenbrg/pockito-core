@@ -15,6 +15,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import io.ghassen.pockito.domain.enums.Country;
+import io.ghassen.pockito.domain.enums.CurrencyCode;
+
 /**
  * User entity representing a registered application user.
  * 

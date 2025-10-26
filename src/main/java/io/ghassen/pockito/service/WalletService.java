@@ -10,13 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
-import io.ghassen.pockito.domain.WalletType;
+import io.ghassen.pockito.domain.enums.WalletType;
 import io.ghassen.pockito.repo.TransactionRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.repo.WalletRepository;
 import io.ghassen.pockito.security.SecurityUtils;
-import io.ghassen.pockito.web.dto.WalletDto;
 import io.ghassen.pockito.web.mapper.WalletMapper;
+import io.ghassen.pockito.web.types.dto.WalletDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +49,7 @@ public class WalletService {
         // Automatically set username from authenticated user
         String username = SecurityUtils.getCurrentUserId();
         walletDto.setUsername(username);
-        
+
         log.debug("Creating wallet for user: {}", username);
 
         // Validate user exists
@@ -64,7 +64,7 @@ public class WalletService {
 
         // Set order position
         int maxOrder = walletRepository.findMaxOrderPositionByUserUsername(username);
-            walletDto.setOrderPosition(maxOrder + 1);
+        walletDto.setOrderPosition(maxOrder + 1);
 
         // Set default flag if not provided
         if (walletDto.getIsDefault() == null) {
@@ -102,12 +102,12 @@ public class WalletService {
         log.debug("Getting wallets for user: {}", username);
         List<Wallet> wallets = walletRepository.findByUserUsernameOrderByOrderPositionAsc(username);
         List<WalletDto> walletDtos = walletMapper.toDtoList(wallets);
-        
+
         // Set derived fields for each wallet
         for (int i = 0; i < wallets.size(); i++) {
             setDerivedFields(walletDtos.get(i), wallets.get(i));
         }
-        
+
         log.info("Retrieved {} wallets for user: {}", walletDtos.size(), username);
         return walletDtos;
     }
@@ -125,7 +125,7 @@ public class WalletService {
         Optional<WalletDto> walletDto = walletRepository.findById(walletId)
                 .filter(wallet -> wallet.getUser().getUsername().equals(username))
                 .map(walletMapper::toDto);
-        
+
         if (walletDto.isPresent()) {
             // Set derived fields for the wallet
             Wallet wallet = walletRepository.findById(walletId)
@@ -138,7 +138,7 @@ public class WalletService {
         } else {
             log.info("Wallet with ID: {} not found or access denied for user: {}", walletId, username);
         }
-        
+
         return walletDto;
     }
 
@@ -152,10 +152,11 @@ public class WalletService {
      *                                  validation fails
      */
     public WalletDto updateWallet(UUID walletId, WalletDto walletDto) {
-        // Automatically set username from authenticated user and prevent username updates
+        // Automatically set username from authenticated user and prevent username
+        // updates
         String username = SecurityUtils.getCurrentUserId();
         walletDto.setUsername(username);
-        
+
         log.debug("Updating wallet with ID: {} for user: {}", walletId, username);
 
         Wallet existingWallet = walletRepository.findById(walletId)
@@ -170,21 +171,26 @@ public class WalletService {
         }
 
         walletDto.setOrderPosition(existingWallet.getOrderPosition());
-        
-        // Currency should not be updated
-        existingWallet.setCurrency(walletDto.getCurrency());
 
         // Update entity with new data
+        // Currency and isDefault are automatically preserved by the mapper (marked as
+        // ignore in updateEntityFromDto)
         walletMapper.updateEntityFromDto(walletDto, existingWallet);
 
         Wallet updatedWallet = walletRepository.save(existingWallet);
 
-        // Handle default wallet change if needed
-        if (walletDto.getIsDefault() && !existingWallet.getIsDefault()) {
+        // Handle default wallet change - always call setDefaultWalletForUser when
+        // isDefault is true
+        // This ensures only one wallet per user is default, and handles both setting
+        // and unsetting
+        if (walletDto.getIsDefault() != null && walletDto.getIsDefault()) {
             walletRepository.setDefaultWalletForUser(username, walletId);
-            // Refresh the updated wallet to get current state
+
+            // Always refresh the wallet to get the current state (especially for isDefault)
+            // This is important because setDefaultWalletForUser modifies the database but
+            // not the in-memory entity
             updatedWallet = walletRepository.findById(walletId)
-                    .orElseThrow(() -> new IllegalArgumentException("Wallet not found after setting as default"));
+                    .orElseThrow(() -> new IllegalArgumentException("Wallet not found after update"));
         }
 
         log.info("Updated wallet with ID: {} for user: {}", walletId, username);
@@ -228,12 +234,12 @@ public class WalletService {
         log.debug("Getting wallets of type {} for user: {}", type, username);
         List<Wallet> wallets = walletRepository.findByUserUsernameAndTypeOrderByOrderPositionAsc(username, type);
         List<WalletDto> walletDtos = walletMapper.toDtoList(wallets);
-        
+
         // Set derived fields for each wallet
         for (int i = 0; i < wallets.size(); i++) {
             setDerivedFields(walletDtos.get(i), wallets.get(i));
         }
-        
+
         log.info("Retrieved {} wallets of type {} for user: {}", walletDtos.size(), type, username);
         return walletDtos;
     }
@@ -249,7 +255,7 @@ public class WalletService {
         log.debug("Getting default wallet for user: {}", username);
         Optional<WalletDto> defaultWallet = walletRepository.findByUserUsernameAndIsDefaultTrue(username)
                 .map(walletMapper::toDto);
-        
+
         if (defaultWallet.isPresent()) {
             // Set derived fields for the wallet
             Wallet wallet = walletRepository.findByUserUsernameAndIsDefaultTrue(username).orElse(null);
@@ -260,7 +266,7 @@ public class WalletService {
         } else {
             log.info("No default wallet found for user: {}", username);
         }
-        
+
         return defaultWallet;
     }
 
@@ -337,7 +343,7 @@ public class WalletService {
      * Set derived fields for a wallet DTO.
      * 
      * @param walletDto the wallet DTO to set derived fields for
-     * @param wallet the wallet entity to get archivedAt information from
+     * @param wallet    the wallet entity to get archivedAt information from
      */
     private void setDerivedFields(WalletDto walletDto, Wallet wallet) {
         // Calculate current balance based on transactions
@@ -358,13 +364,13 @@ public class WalletService {
     private BigDecimal calculateCurrentBalance(Wallet wallet) {
         try {
             BigDecimal currentBalance = transactionRepository.calculateCurrentBalance(wallet.getId());
-            
-            log.debug("Calculated balance for wallet {}: initial={}, current={}", 
+
+            log.debug("Calculated balance for wallet {}: initial={}, current={}",
                     wallet.getId(), wallet.getInitialBalance(), currentBalance);
-            
+
             return currentBalance;
         } catch (Exception e) {
-            log.warn("Error calculating balance for wallet {}, falling back to initial balance: {}", 
+            log.warn("Error calculating balance for wallet {}, falling back to initial balance: {}",
                     wallet.getId(), e.getMessage());
             return wallet.getInitialBalance();
         }

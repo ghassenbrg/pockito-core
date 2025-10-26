@@ -2,7 +2,7 @@ package io.ghassen.pockito.service;
 
 import io.ghassen.pockito.domain.Category;
 import io.ghassen.pockito.domain.Transaction;
-import io.ghassen.pockito.domain.TransactionType;
+import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
 import io.ghassen.pockito.repo.CategoryRepository;
@@ -10,7 +10,7 @@ import io.ghassen.pockito.repo.TransactionRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.repo.WalletRepository;
 import io.ghassen.pockito.security.SecurityUtils;
-import io.ghassen.pockito.web.dto.TransactionDto;
+import io.ghassen.pockito.web.types.dto.TransactionDto;
 import io.ghassen.pockito.web.mapper.TransactionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

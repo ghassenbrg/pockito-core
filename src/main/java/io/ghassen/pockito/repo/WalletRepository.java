@@ -1,11 +1,13 @@
 package io.ghassen.pockito.repo;
 
 import io.ghassen.pockito.domain.Wallet;
-import io.ghassen.pockito.domain.WalletType;
+import io.ghassen.pockito.domain.enums.WalletType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -109,7 +111,7 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
      */
     @Query("UPDATE Wallet w SET w.isDefault = CASE WHEN w.id = :walletId THEN true ELSE false END " +
            "WHERE w.user.username = :username")
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.transaction.annotation.Transactional
+    @Modifying(clearAutomatically = true)
+    @Transactional
     void setDefaultWalletForUser(@Param("username") String username, @Param("walletId") UUID walletId);
 }

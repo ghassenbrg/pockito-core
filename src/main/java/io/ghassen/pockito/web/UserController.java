@@ -3,17 +3,19 @@ package io.ghassen.pockito.web;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.security.SecurityUtils;
 import io.ghassen.pockito.service.UserService;
-import io.ghassen.pockito.web.dto.UserDto;
+import io.ghassen.pockito.web.types.dto.UserDto;
+import io.ghassen.pockito.web.types.response.UserResponse;
 import io.ghassen.pockito.web.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import io.ghassen.pockito.web.validation.ValidationGroups;
 
 import java.util.Optional;
 
@@ -51,7 +53,7 @@ public class UserController {
         description = "Retrieves the current authenticated user or creates a new one if it doesn't exist. " +
                      "This implements the core requirement to create users on first Keycloak token authentication."
     )
-    public ResponseEntity<UserDto> getOrCreateCurrentUser() {
+    public ResponseEntity<UserResponse> getOrCreateCurrentUser() {
         
         // the username from the authenticated user's token
         String username = SecurityUtils.getCurrentUserId();
@@ -60,7 +62,8 @@ public class UserController {
         User user = userService.getOrCreateUser(username);
         
         UserDto userDto = userMapper.toDto(user);
-        return ResponseEntity.ok(userDto);
+        UserResponse userResponse = userMapper.toResponse(userDto);
+        return ResponseEntity.ok(userResponse);
     }
 
     /**
@@ -75,7 +78,7 @@ public class UserController {
         summary = "Get user by username",
         description = "Retrieves a user by their username"
     )
-    public ResponseEntity<UserDto> getUserByUsername(
+    public ResponseEntity<UserResponse> getUserByUsername(
             @Parameter(description = "Username to search for") 
             @PathVariable String username) {
         
@@ -84,7 +87,7 @@ public class UserController {
         
         if (user.isPresent()) {
             UserDto userDto = userMapper.toDto(user.get());
-            return ResponseEntity.ok(userDto);
+            return ResponseEntity.ok(userMapper.toResponse(userDto));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -103,18 +106,18 @@ public class UserController {
         summary = "Update user country",
         description = "Updates the country for a specific user. Accepts both alpha-2 and alpha-3 country codes."
     )
-    public ResponseEntity<UserDto> updateUserCountry(
+    public ResponseEntity<UserResponse> updateUserCountry(
             @Parameter(description = "Username of the user to update") 
             @PathVariable String username,
             @Parameter(description = "Country code (alpha-2 or alpha-3)") 
-            @RequestParam String countryCode) {
+            @Validated(ValidationGroups.Update.class) @RequestParam String countryCode) {
         
         log.info("Updating country to '{}' for user: {}", countryCode, username);
         Optional<User> updatedUser = userService.updateCountry(username, countryCode);
         
         if (updatedUser.isPresent()) {
             UserDto userDto = userMapper.toDto(updatedUser.get());
-            return ResponseEntity.ok(userDto);
+            return ResponseEntity.ok(userMapper.toResponse(userDto));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -133,18 +136,18 @@ public class UserController {
         summary = "Update user default currency",
         description = "Updates the default currency for a specific user. Accepts 3-letter ISO currency codes."
     )
-    public ResponseEntity<UserDto> updateUserCurrency(
+    public ResponseEntity<UserResponse> updateUserCurrency(
             @Parameter(description = "Username of the user to update") 
             @PathVariable String username,
             @Parameter(description = "Currency code (3-letter ISO)") 
-            @RequestParam String currencyCode) {
+            @Validated(ValidationGroups.Update.class) @RequestParam String currencyCode) {
         
         log.info("Updating default currency to '{}' for user: {}", currencyCode, username);
         Optional<User> updatedUser = userService.updateDefaultCurrency(username, currencyCode);
         
         if (updatedUser.isPresent()) {
             UserDto userDto = userMapper.toDto(updatedUser.get());
-            return ResponseEntity.ok(userDto);
+            return ResponseEntity.ok(userMapper.toResponse(userDto));
         } else {
             return ResponseEntity.notFound().build();
         }

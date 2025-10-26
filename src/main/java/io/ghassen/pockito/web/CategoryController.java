@@ -1,12 +1,17 @@
 package io.ghassen.pockito.web;
 
-import io.ghassen.pockito.domain.CategoryType;
+import io.ghassen.pockito.domain.enums.CategoryType;
 import io.ghassen.pockito.service.CategoryService;
-import io.ghassen.pockito.web.dto.CategoryDto;
+import io.ghassen.pockito.web.types.dto.CategoryDto;
+import io.ghassen.pockito.web.types.request.CategoryRequest;
+import io.ghassen.pockito.web.types.response.CategoryResponse;
+import io.ghassen.pockito.web.types.response.CategoryListResponse;
+import io.ghassen.pockito.web.mapper.CategoryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import io.ghassen.pockito.web.validation.ValidationGroups;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,11 +36,12 @@ import java.util.UUID;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
     /**
      * Create a new category for the authenticated user.
      * 
-     * @param categoryDto the category data to create
+     * @param categoryRequest the category data to create
      * @return the created category
      */
     @PostMapping
@@ -44,14 +50,20 @@ public class CategoryController {
         summary = "Create a new category",
         description = "Creates a new category for the authenticated user. Category names must be unique per user."
     )
-    public ResponseEntity<CategoryDto> createCategory(
-            @Valid @RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<CategoryResponse> createCategory(
+            @Validated(ValidationGroups.Create.class) @RequestBody CategoryRequest categoryRequest) {
         
-        log.info("Creating category: {}", categoryDto.getName());
+        log.info("Creating category: {}", categoryRequest.getName());
         
-        // Username is automatically set by the service from SecurityUtils
-        CategoryDto createdCategory = categoryService.createCategory(categoryDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+        // Convert request to DTO for service layer
+        CategoryDto categoryDto = categoryMapper.requestToDto(categoryRequest);
+        
+        CategoryDto createdCategoryDto = categoryService.createCategory(categoryDto);
+        
+        // Convert DTO to response
+        CategoryResponse categoryResponse = categoryMapper.dtoToResponse(createdCategoryDto);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryResponse);
     }
 
     /**
@@ -65,12 +77,21 @@ public class CategoryController {
         summary = "Get all categories",
         description = "Retrieves all categories for the authenticated user, ordered by name."
     )
-    public ResponseEntity<List<CategoryDto>> getUserCategories() {
+    public ResponseEntity<CategoryListResponse> getUserCategories() {
         
         log.debug("Getting all categories for authenticated user");
         
-        List<CategoryDto> categories = categoryService.getUserCategories();
-        return ResponseEntity.ok(categories);
+        List<CategoryDto> categoryDtos = categoryService.getUserCategories();
+        
+        // Convert DTOs to responses
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categoryDtos);
+        
+        CategoryListResponse response = CategoryListResponse.builder()
+            .categories(categoryResponses)
+            .totalCount((long) categoryResponses.size())
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -85,14 +106,23 @@ public class CategoryController {
         summary = "Get categories by type",
         description = "Retrieves all categories of a specific type (EXPENSE or INCOME) for the authenticated user."
     )
-    public ResponseEntity<List<CategoryDto>> getCategoriesByType(
+    public ResponseEntity<CategoryListResponse> getCategoriesByType(
             @Parameter(description = "Category type to filter by") 
             @PathVariable CategoryType categoryType) {
         
         log.debug("Getting categories of type {} for authenticated user", categoryType);
         
-        List<CategoryDto> categories = categoryService.getUserCategoriesByType(categoryType);
-        return ResponseEntity.ok(categories);
+        List<CategoryDto> categoryDtos = categoryService.getUserCategoriesByType(categoryType);
+        
+        // Convert DTOs to responses
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categoryDtos);
+        
+        CategoryListResponse response = CategoryListResponse.builder()
+            .categories(categoryResponses)
+            .totalCount((long) categoryResponses.size())
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -106,12 +136,17 @@ public class CategoryController {
         summary = "Get hierarchical categories",
         description = "Retrieves all categories for the authenticated user in hierarchical order (parents first, then children)."
     )
-    public ResponseEntity<List<CategoryDto>> getHierarchicalCategories() {
+    public ResponseEntity<CategoryListResponse> getHierarchicalCategories() {
         
         log.debug("Getting hierarchical categories for authenticated user");
         
         List<CategoryDto> categories = categoryService.getHierarchicalCategories();
-        return ResponseEntity.ok(categories);
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categories);
+        CategoryListResponse response = CategoryListResponse.builder()
+                .categories(categoryResponses)
+                .totalCount((long) categoryResponses.size())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -126,14 +161,19 @@ public class CategoryController {
         summary = "Get hierarchical categories by type",
         description = "Retrieves all categories of a specific type for the authenticated user in hierarchical order."
     )
-    public ResponseEntity<List<CategoryDto>> getHierarchicalCategoriesByType(
+    public ResponseEntity<CategoryListResponse> getHierarchicalCategoriesByType(
             @Parameter(description = "Category type to filter by") 
             @PathVariable CategoryType categoryType) {
         
         log.debug("Getting hierarchical categories of type {} for authenticated user", categoryType);
         
         List<CategoryDto> categories = categoryService.getHierarchicalCategoriesByType(categoryType);
-        return ResponseEntity.ok(categories);
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categories);
+        CategoryListResponse response = CategoryListResponse.builder()
+                .categories(categoryResponses)
+                .totalCount((long) categoryResponses.size())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -148,13 +188,14 @@ public class CategoryController {
         summary = "Get category by ID",
         description = "Retrieves a specific category by its ID for the authenticated user."
     )
-    public ResponseEntity<CategoryDto> getCategory(
+    public ResponseEntity<CategoryResponse> getCategory(
             @Parameter(description = "Category ID") 
             @PathVariable UUID categoryId) {
         
         log.debug("Getting category with ID: {}", categoryId);
         
         return categoryService.getCategoryById(categoryId)
+            .map(categoryMapper::dtoToResponse)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -171,14 +212,19 @@ public class CategoryController {
         summary = "Get child categories",
         description = "Retrieves all child categories of a specific parent category for the authenticated user."
     )
-    public ResponseEntity<List<CategoryDto>> getChildCategories(
+    public ResponseEntity<CategoryListResponse> getChildCategories(
             @Parameter(description = "Parent category ID") 
             @PathVariable UUID parentCategoryId) {
         
         log.debug("Getting child categories for parent ID: {}", parentCategoryId);
         
         List<CategoryDto> categories = categoryService.getChildCategories(parentCategoryId);
-        return ResponseEntity.ok(categories);
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categories);
+        CategoryListResponse response = CategoryListResponse.builder()
+                .categories(categoryResponses)
+                .totalCount((long) categoryResponses.size())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -192,12 +238,17 @@ public class CategoryController {
         summary = "Get root categories",
         description = "Retrieves all root categories (categories without a parent) for the authenticated user."
     )
-    public ResponseEntity<List<CategoryDto>> getRootCategories() {
+    public ResponseEntity<CategoryListResponse> getRootCategories() {
         
         log.debug("Getting root categories for authenticated user");
         
         List<CategoryDto> categories = categoryService.getRootCategories();
-        return ResponseEntity.ok(categories);
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categories);
+        CategoryListResponse response = CategoryListResponse.builder()
+                .categories(categoryResponses)
+                .totalCount((long) categoryResponses.size())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -212,21 +263,26 @@ public class CategoryController {
         summary = "Get categories by color",
         description = "Retrieves all categories with a specific color for the authenticated user."
     )
-    public ResponseEntity<List<CategoryDto>> getCategoriesByColor(
+    public ResponseEntity<CategoryListResponse> getCategoriesByColor(
             @Parameter(description = "Color to filter by (hex format, e.g., #A1B2C3)") 
             @PathVariable String color) {
         
         log.debug("Getting categories with color: {}", color);
         
         List<CategoryDto> categories = categoryService.getCategoriesByColor(color);
-        return ResponseEntity.ok(categories);
+        List<CategoryResponse> categoryResponses = categoryMapper.dtoListToResponseList(categories);
+        CategoryListResponse response = CategoryListResponse.builder()
+                .categories(categoryResponses)
+                .totalCount((long) categoryResponses.size())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Update an existing category for the authenticated user.
      * 
      * @param categoryId the category ID to update
-     * @param categoryDto the updated category data
+     * @param categoryRequest the updated category data
      * @return the updated category
      */
     @PutMapping("/{categoryId}")
@@ -235,17 +291,23 @@ public class CategoryController {
         summary = "Update category",
         description = "Updates an existing category for the authenticated user. Category names must remain unique per user."
     )
-    public ResponseEntity<CategoryDto> updateCategory(
+    public ResponseEntity<CategoryResponse> updateCategory(
             @Parameter(description = "Category ID to update") 
             @PathVariable UUID categoryId,
-            @Valid @RequestBody CategoryDto categoryDto) {
+            @Validated(ValidationGroups.Update.class) @RequestBody CategoryRequest categoryRequest) {
         
         log.info("Updating category with ID: {}", categoryId);
         
-        // Username is automatically set by the service from SecurityUtils and cannot be updated
+        // Convert request to DTO for service layer
+        CategoryDto categoryDto = categoryMapper.requestToDto(categoryRequest);
+        
         try {
-            CategoryDto updatedCategory = categoryService.updateCategory(categoryId, categoryDto);
-            return ResponseEntity.ok(updatedCategory);
+            CategoryDto updatedCategoryDto = categoryService.updateCategory(categoryId, categoryDto);
+            
+            // Convert DTO to response
+            CategoryResponse categoryResponse = categoryMapper.dtoToResponse(updatedCategoryDto);
+            
+            return ResponseEntity.ok(categoryResponse);
         } catch (IllegalArgumentException e) {
             log.warn("Failed to update category: {}", e.getMessage());
             return ResponseEntity.badRequest().build();

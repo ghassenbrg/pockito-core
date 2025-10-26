@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.ghassen.pockito.domain.Category;
-import io.ghassen.pockito.domain.CategoryType;
+import io.ghassen.pockito.domain.enums.CategoryType;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.repo.CategoryRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.security.SecurityUtils;
-import io.ghassen.pockito.web.dto.CategoryDto;
+import io.ghassen.pockito.web.types.dto.CategoryDto;
 import io.ghassen.pockito.web.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

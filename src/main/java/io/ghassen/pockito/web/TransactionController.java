@@ -1,12 +1,17 @@
 package io.ghassen.pockito.web;
 
-import io.ghassen.pockito.domain.TransactionType;
+import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.service.TransactionService;
-import io.ghassen.pockito.web.dto.TransactionDto;
+import io.ghassen.pockito.web.types.dto.TransactionDto;
+import io.ghassen.pockito.web.types.request.TransactionRequest;
+import io.ghassen.pockito.web.types.response.TransactionResponse;
+import io.ghassen.pockito.web.types.response.TransactionListResponse;
+import io.ghassen.pockito.web.mapper.TransactionMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import io.ghassen.pockito.web.validation.ValidationGroups;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,11 +42,12 @@ import java.util.UUID;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final TransactionMapper transactionMapper;
 
     /**
      * Create a new transaction for the authenticated user.
      * 
-     * @param transactionDto the transaction data to create
+     * @param transactionRequest the transaction data to create
      * @return the created transaction
      */
     @PostMapping
@@ -51,20 +57,27 @@ public class TransactionController {
         description = "Creates a new transaction with validation rules based on transaction type. " +
                      "EXPENSE requires walletFrom, INCOME requires walletTo, TRANSFER requires at least one wallet."
     )
-    public ResponseEntity<TransactionDto> createTransaction(
-            @Valid @RequestBody TransactionDto transactionDto) {
+    public ResponseEntity<TransactionResponse> createTransaction(
+            @Validated(ValidationGroups.Create.class) @RequestBody TransactionRequest transactionRequest) {
         
-        log.info("Creating transaction of type: {}", transactionDto.getTransactionType());
+        log.info("Creating transaction of type: {}", transactionRequest.getTransactionType());
         
-        TransactionDto createdTransaction = transactionService.createTransaction(transactionDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTransaction);
+        // Convert request to DTO for service layer
+        TransactionDto transactionDto = transactionMapper.requestToDto(transactionRequest);
+        
+        TransactionDto createdTransactionDto = transactionService.createTransaction(transactionDto);
+        
+        // Convert DTO to response
+        TransactionResponse transactionResponse = transactionMapper.dtoToResponse(createdTransactionDto);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionResponse);
     }
 
     /**
      * Update an existing transaction for the authenticated user.
      * 
      * @param transactionId the transaction ID to update
-     * @param transactionDto the updated transaction data
+     * @param transactionRequest the updated transaction data
      * @return the updated transaction
      */
     @PutMapping("/{transactionId}")
@@ -73,16 +86,23 @@ public class TransactionController {
         summary = "Update an existing transaction",
         description = "Updates an existing transaction with the same validation rules as creation."
     )
-    public ResponseEntity<TransactionDto> updateTransaction(
+    public ResponseEntity<TransactionResponse> updateTransaction(
             @Parameter(description = "Transaction ID to update") 
             @PathVariable UUID transactionId,
-            @Valid @RequestBody TransactionDto transactionDto) {
+            @Validated(ValidationGroups.Update.class) @RequestBody TransactionRequest transactionRequest) {
         
         log.info("Updating transaction with ID: {}", transactionId);
         
+        // Convert request to DTO for service layer
+        TransactionDto transactionDto = transactionMapper.requestToDto(transactionRequest);
+        
         try {
-            TransactionDto updatedTransaction = transactionService.updateTransaction(transactionId, transactionDto);
-            return ResponseEntity.ok(updatedTransaction);
+            TransactionDto updatedTransactionDto = transactionService.updateTransaction(transactionId, transactionDto);
+            
+            // Convert DTO to response
+            TransactionResponse transactionResponse = transactionMapper.dtoToResponse(updatedTransactionDto);
+            
+            return ResponseEntity.ok(transactionResponse);
         } catch (IllegalArgumentException e) {
             log.warn("Failed to update transaction: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -101,13 +121,14 @@ public class TransactionController {
         summary = "Get transaction by ID",
         description = "Retrieves a single transaction by its unique ID."
     )
-    public ResponseEntity<TransactionDto> getTransaction(
+    public ResponseEntity<TransactionResponse> getTransaction(
             @Parameter(description = "Transaction ID to retrieve") 
             @PathVariable UUID transactionId) {
         
         log.debug("Getting transaction with ID: {}", transactionId);
         
         return transactionService.getTransactionById(transactionId)
+            .map(transactionMapper::dtoToResponse)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -194,11 +215,20 @@ public class TransactionController {
         description = "Retrieves all transactions for the authenticated user without pagination. " +
                      "Use with caution for users with large transaction volumes."
     )
-    public ResponseEntity<List<TransactionDto>> getAllTransactions() {
+    public ResponseEntity<TransactionListResponse> getAllTransactions() {
         log.debug("Getting all transactions for user");
         
-        List<TransactionDto> transactions = transactionService.getAllUserTransactions();
-        return ResponseEntity.ok(transactions);
+        List<TransactionDto> transactionDtos = transactionService.getAllUserTransactions();
+        
+        // Convert DTOs to responses
+        List<TransactionResponse> transactionResponses = transactionMapper.dtoListToResponseList(transactionDtos);
+        
+        TransactionListResponse response = TransactionListResponse.builder()
+            .transactions(transactionResponses)
+            .totalCount((long) transactionResponses.size())
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     /**

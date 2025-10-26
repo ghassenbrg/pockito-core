@@ -1,4 +1,4 @@
-package io.ghassen.pockito.domain;
+package io.ghassen.pockito.domain.enums;
 
 /**
  * Wallet type enum defining the different categories of wallets.

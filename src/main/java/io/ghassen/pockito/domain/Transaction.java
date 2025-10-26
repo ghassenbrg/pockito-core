@@ -24,6 +24,8 @@ import lombok.experimental.SuperBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import io.ghassen.pockito.domain.enums.TransactionType;
+
 /**
  * Transaction entity representing a financial transaction between wallets.
  * 

@@ -1,4 +1,4 @@
-package io.ghassen.pockito.domain;
+package io.ghassen.pockito.domain.enums;
 
 /**
  * Enum representing the type of transaction.

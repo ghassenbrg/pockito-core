@@ -1,4 +1,4 @@
-package io.ghassen.pockito.web.dto;
+package io.ghassen.pockito.web.types.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;

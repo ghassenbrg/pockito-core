@@ -24,6 +24,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
+import io.ghassen.pockito.domain.enums.CurrencyCode;
+import io.ghassen.pockito.domain.enums.WalletType;
+
 /**
  * Wallet entity representing a user's financial account or instrument.
  * 

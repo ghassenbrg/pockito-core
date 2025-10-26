@@ -115,7 +115,7 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .map(user -> {
                     try {
-                        user.setCountry(io.ghassen.pockito.domain.Country.fromCode(countryCode));
+                        user.setCountry(io.ghassen.pockito.domain.enums.Country.fromCode(countryCode));
                         user.setSystemAction(true); // Mark as system action for audit trail
                         return userRepository.save(user);
                     } catch (IllegalArgumentException e) {
@@ -141,7 +141,7 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .map(user -> {
                     try {
-                        user.setDefaultCurrency(io.ghassen.pockito.domain.CurrencyCode.fromCode(currencyCode));
+                        user.setDefaultCurrency(io.ghassen.pockito.domain.enums.CurrencyCode.fromCode(currencyCode));
                         user.setSystemAction(true); // Mark as system action for audit trail
                         return userRepository.save(user);
                     } catch (IllegalArgumentException e) {

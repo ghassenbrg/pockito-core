@@ -1,9 +1,6 @@
-package io.ghassen.pockito.web.dto;
+package io.ghassen.pockito.web.types.request;
 
-import java.time.Instant;
-import java.util.UUID;
-
-import io.ghassen.pockito.domain.CategoryType;
+import io.ghassen.pockito.domain.enums.CategoryType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -13,29 +10,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
- * Data Transfer Object for Category entity.
+ * Request DTO for creating and updating categories.
  * 
- * Used for transferring category data between the web layer and service layer.
- * Includes validation annotations to ensure data integrity.
+ * Used as API request payload for category operations.
+ * Excludes fields that are automatically managed by the system (id, username).
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
-
-    /**
-     * Category unique identifier.
-     */
-    private UUID id;
-
-    /**
-     * Username of the category owner.
-     * This field is automatically set from the authenticated user and cannot be
-     * updated.
-     */
-    private String username;
+public class CategoryRequest {
 
     /**
      * Category name - must be unique per user.
@@ -69,32 +56,4 @@ public class CategoryDto {
      * Null for root categories.
      */
     private UUID parentCategoryId;
-
-    /**
-     * Name of the parent category (for display purposes).
-     * This is a derived field populated by the service.
-     */
-    private String parentCategoryName;
-
-    /**
-     * Whether the category is active (not archived).
-     * Derived from archivedAt field - true if archivedAt is null, false otherwise.
-     */
-    private Boolean active;
-
-    /**
-     * Number of child categories (for display purposes).
-     * This is a derived field populated by the service.
-     */
-    private Integer childCount;
-
-    /**
-     * Creation timestamp.
-     */
-    private Instant createdAt;
-
-    /**
-     * Last update timestamp.
-     */
-    private Instant updatedAt;
 }

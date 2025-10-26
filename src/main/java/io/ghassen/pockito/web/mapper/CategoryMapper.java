@@ -1,7 +1,9 @@
 package io.ghassen.pockito.web.mapper;
 
 import io.ghassen.pockito.domain.Category;
-import io.ghassen.pockito.web.dto.CategoryDto;
+import io.ghassen.pockito.web.types.dto.CategoryDto;
+import io.ghassen.pockito.web.types.request.CategoryRequest;
+import io.ghassen.pockito.web.types.response.CategoryResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -34,6 +36,7 @@ public interface CategoryMapper {
     @Mapping(source = "parentCategory.name", target = "parentCategoryName")
     @Mapping(expression = "java(category.getArchivedAt() == null)", target = "active")
     @Mapping(target = "childCount", ignore = true) // Will be set by service
+
     CategoryDto toDto(Category category);
 
     /**
@@ -84,4 +87,28 @@ public interface CategoryMapper {
      * @return the corresponding list of entities
      */
     List<Category> toEntityList(List<CategoryDto> categoryDtos);
+
+    /**
+     * Convert CategoryRequest to CategoryDto.
+     * 
+     * @param categoryRequest the request to convert
+     * @return the corresponding DTO
+     */
+    CategoryDto requestToDto(CategoryRequest categoryRequest);
+
+    /**
+     * Convert CategoryDto to CategoryResponse.
+     * 
+     * @param categoryDto the DTO to convert
+     * @return the corresponding response
+     */
+    CategoryResponse dtoToResponse(CategoryDto categoryDto);
+
+    /**
+     * Convert list of CategoryDto to list of CategoryResponse.
+     * 
+     * @param categoryDtos the list of DTOs to convert
+     * @return the corresponding list of responses
+     */
+    List<CategoryResponse> dtoListToResponseList(List<CategoryDto> categoryDtos);
 }
