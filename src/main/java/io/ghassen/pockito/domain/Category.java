@@ -78,14 +78,6 @@ public class Category extends AuditableEntity {
     private String name;
 
     /**
-     * Description of the category.
-     * Optional field with length validation.
-     */
-    @Column(name = "description", length = 500)
-    @Size(max = 500)
-    private String description;
-
-    /**
      * Hex color code for the category (e.g., #A1B2C3).
      * Required field with hex color validation.
      */

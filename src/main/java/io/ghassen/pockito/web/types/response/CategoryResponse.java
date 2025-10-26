@@ -37,11 +37,6 @@ public class CategoryResponse {
     private String name;
 
     /**
-     * Description of the category.
-     */
-    private String description;
-
-    /**
      * Hex color code for the category.
      */
     private String color;
