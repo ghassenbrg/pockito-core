@@ -175,4 +175,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("username") String username,
             @Param("transactionType") TransactionType transactionType,
             Pageable pageable);
+
+    /**
+     * Find all transactions for a specific wallet (either as source or destination).
+     * Used for handling transactions when a wallet is deleted.
+     * 
+     * @param walletId the wallet ID to filter by
+     * @return list of transactions involving the specified wallet
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.walletFrom.id = :walletId OR t.walletTo.id = :walletId")
+    List<Transaction> findAllByWalletId(@Param("walletId") UUID walletId);
 }

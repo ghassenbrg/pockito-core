@@ -47,7 +47,6 @@ public enum CurrencyCode {
     SYP("SYP", 760, "Syrian Pound"),
     LBP("LBP", 422, "Lebanese Pound"),
     JOD("JOD", 400, "Jordanian Dinar"),
-    ILS("ILS", 376, "Israeli New Shekel"),
     EGP("EGP", 818, "Egyptian Pound"),
     LYD("LYD", 434, "Libyan Dinar"),
     TND("TND", 788, "Tunisian Dinar"),

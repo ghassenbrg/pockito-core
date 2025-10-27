@@ -8,8 +8,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.ghassen.pockito.domain.Transaction;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
+import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.domain.enums.WalletType;
 import io.ghassen.pockito.repo.TransactionRepository;
 import io.ghassen.pockito.repo.UserRepository;
@@ -218,8 +220,101 @@ public class WalletService {
             log.warn("Deleting default wallet for user: {}. Consider setting a new default wallet.", username);
         }
 
+        // Handle related transactions before deleting the wallet
+        // This prevents foreign key constraint violations
+        handleRelatedTransactions(walletId, username);
+
+        // Delete the wallet
         walletRepository.delete(wallet);
         log.info("Deleted wallet with ID: {} for user: {}", walletId, username);
+    }
+
+    /**
+     * Handle related transactions when a wallet is being deleted.
+     * 
+     * - EXPENSE or INCOME transactions → delete the transactions
+     * - TRANSFER transactions:
+     *   - If either the source or destination wallet is null, delete the transaction
+     *   - If the transfer involves another existing wallet, set the reference to the deleted wallet to null
+     * 
+     * @param walletId the wallet ID being deleted
+     * @param username the username of the wallet owner
+     */
+    private void handleRelatedTransactions(UUID walletId, String username) {
+        log.debug("Handling related transactions for wallet {} belonging to user {}", walletId, username);
+        
+        // Find all transactions that reference this wallet
+        List<Transaction> relatedTransactions = transactionRepository.findAllByWalletId(walletId);
+        
+        if (relatedTransactions.isEmpty()) {
+            log.debug("No related transactions found for wallet {}", walletId);
+            return;
+        }
+        
+        log.info("Found {} related transactions for wallet {}", relatedTransactions.size(), walletId);
+        
+        for (Transaction transaction : relatedTransactions) {
+            // Ensure the transaction belongs to the same user
+            if (!transaction.getUser().getUsername().equals(username)) {
+                log.warn("Skipping transaction {} - user mismatch", transaction.getId());
+                continue;
+            }
+            
+            handleTransaction(transaction, walletId);
+        }
+        
+        log.info("Completed handling transactions for wallet {}", walletId);
+    }
+
+    /**
+     * Handle a single transaction based on its type and wallet references.
+     * 
+     * @param transaction the transaction to handle
+     * @param deletedWalletId the wallet ID being deleted
+     */
+    private void handleTransaction(Transaction transaction, UUID deletedWalletId) {
+        TransactionType type = transaction.getTransactionType();
+        UUID walletFromId = transaction.getWalletFrom() != null ? transaction.getWalletFrom().getId() : null;
+        UUID walletToId = transaction.getWalletTo() != null ? transaction.getWalletTo().getId() : null;
+        
+        boolean isFromWallet = deletedWalletId.equals(walletFromId);
+        boolean isToWallet = deletedWalletId.equals(walletToId);
+        
+        if (type == TransactionType.EXPENSE || type == TransactionType.INCOME) {
+            // For EXPENSE and INCOME transactions: delete them
+            log.debug("Deleting {} transaction {} involving deleted wallet", type, transaction.getId());
+            transactionRepository.delete(transaction);
+            
+        } else if (type == TransactionType.TRANSFER) {
+            // For TRANSFER transactions: check conditions
+            boolean fromIsNull = walletFromId == null;
+            boolean toIsNull = walletToId == null;
+            
+            // Check if the other wallet reference is null (excluding the one being deleted)
+            if (fromIsNull || toIsNull) {
+                // If either wallet is null, delete the transaction
+                log.debug("Deleting TRANSFER transaction {} - one wallet is null", transaction.getId());
+                transactionRepository.delete(transaction);
+                
+            } else if (isFromWallet && !isToWallet) {
+                // This wallet is the source, set walletFrom to null
+                log.debug("Setting walletFrom to null for TRANSFER transaction {}", transaction.getId());
+                transaction.setWalletFrom(null);
+                transactionRepository.save(transaction);
+                
+            } else if (isToWallet && !isFromWallet) {
+                // This wallet is the destination, set walletTo to null
+                log.debug("Setting walletTo to null for TRANSFER transaction {}", transaction.getId());
+                transaction.setWalletTo(null);
+                transactionRepository.save(transaction);
+                
+            } else {
+                // Both wallets are the deleted wallet (shouldn't happen with current constraints)
+                // or some edge case - delete to be safe
+                log.warn("Deleting TRANSFER transaction {} - both wallets reference deleted wallet", transaction.getId());
+                transactionRepository.delete(transaction);
+            }
+        }
     }
 
     /**

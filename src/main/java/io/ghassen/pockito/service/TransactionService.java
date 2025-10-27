@@ -1,29 +1,30 @@
 package io.ghassen.pockito.service;
 
-import io.ghassen.pockito.domain.Category;
-import io.ghassen.pockito.domain.Transaction;
-import io.ghassen.pockito.domain.enums.TransactionType;
-import io.ghassen.pockito.domain.User;
-import io.ghassen.pockito.domain.Wallet;
-import io.ghassen.pockito.repo.CategoryRepository;
-import io.ghassen.pockito.repo.TransactionRepository;
-import io.ghassen.pockito.repo.UserRepository;
-import io.ghassen.pockito.repo.WalletRepository;
-import io.ghassen.pockito.security.SecurityUtils;
-import io.ghassen.pockito.web.types.dto.TransactionDto;
-import io.ghassen.pockito.web.mapper.TransactionMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.ghassen.pockito.domain.Category;
+import io.ghassen.pockito.domain.Transaction;
+import io.ghassen.pockito.domain.User;
+import io.ghassen.pockito.domain.Wallet;
+import io.ghassen.pockito.domain.enums.TransactionType;
+import io.ghassen.pockito.repo.CategoryRepository;
+import io.ghassen.pockito.repo.TransactionRepository;
+import io.ghassen.pockito.repo.UserRepository;
+import io.ghassen.pockito.repo.WalletRepository;
+import io.ghassen.pockito.security.SecurityUtils;
+import io.ghassen.pockito.web.mapper.TransactionMapper;
+import io.ghassen.pockito.web.types.dto.TransactionDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service class for transaction business operations.
@@ -288,6 +289,9 @@ public class TransactionService {
                 if (transactionDto.getWalletFromId() == null && transactionDto.getWalletToId() == null) {
                     throw new IllegalArgumentException(
                             "TRANSFER transactions require at least one of walletFrom or walletTo to be set");
+                } else if (transactionDto.getWalletFromId() != null && transactionDto.getWalletToId() != null
+                        && transactionDto.getWalletFromId().equals(transactionDto.getWalletToId())) {
+                    throw new IllegalArgumentException("Source wallet and destination wallet cannot be the same");
                 }
                 break;
 

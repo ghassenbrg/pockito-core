@@ -80,7 +80,6 @@ public enum Country {
     SY("SY", "SYR", "Syria"),
     LB("LB", "LBN", "Lebanon"),
     JO("JO", "JOR", "Jordan"),
-    IL("IL", "ISR", "Israel"),
     PS("PS", "PSE", "Palestine"),
     SA("SA", "SAU", "Saudi Arabia"),
     AE("AE", "ARE", "United Arab Emirates"),
