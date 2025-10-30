@@ -268,20 +268,24 @@ public class TransactionService {
 
         switch (type) {
             case EXPENSE:
+                // Force walletTo to be null for expense transactions
+                if (transactionDto.getWalletToId() != null) {
+                    log.debug("Forcing walletTo to null for EXPENSE transaction");
+                    transactionDto.setWalletToId(null);
+                }
                 if (transactionDto.getWalletFromId() == null) {
                     throw new IllegalArgumentException("EXPENSE transactions require walletFrom to be set");
-                }
-                if (transactionDto.getWalletToId() != null) {
-                    throw new IllegalArgumentException("EXPENSE transactions must have walletTo set to NULL");
                 }
                 break;
 
             case INCOME:
+                // Force walletFrom to be null for income transactions
+                if (transactionDto.getWalletFromId() != null) {
+                    log.debug("Forcing walletFrom to null for INCOME transaction");
+                    transactionDto.setWalletFromId(null);
+                }
                 if (transactionDto.getWalletToId() == null) {
                     throw new IllegalArgumentException("INCOME transactions require walletTo to be set");
-                }
-                if (transactionDto.getWalletFromId() != null) {
-                    throw new IllegalArgumentException("INCOME transactions must have walletFrom set to NULL");
                 }
                 break;
 
@@ -311,20 +315,24 @@ public class TransactionService {
     private void setRelatedEntities(Transaction transaction, TransactionDto transactionDto) {
         String username = transactionDto.getUsername();
 
-        // Set walletFrom if provided
+        // Set walletFrom if provided, otherwise clear it
         if (transactionDto.getWalletFromId() != null) {
             Wallet walletFrom = walletRepository.findById(transactionDto.getWalletFromId())
                     .filter(wallet -> wallet.getUser().getUsername().equals(username))
                     .orElseThrow(() -> new IllegalArgumentException("Source wallet not found or access denied"));
             transaction.setWalletFrom(walletFrom);
+        } else {
+            transaction.setWalletFrom(null);
         }
 
-        // Set walletTo if provided
+        // Set walletTo if provided, otherwise clear it
         if (transactionDto.getWalletToId() != null) {
             Wallet walletTo = walletRepository.findById(transactionDto.getWalletToId())
                     .filter(wallet -> wallet.getUser().getUsername().equals(username))
                     .orElseThrow(() -> new IllegalArgumentException("Destination wallet not found or access denied"));
             transaction.setWalletTo(walletTo);
+        } else {
+            transaction.setWalletTo(null);
         }
 
         // Set category if provided
