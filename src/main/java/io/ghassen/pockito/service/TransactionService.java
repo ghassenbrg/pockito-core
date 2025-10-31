@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -78,7 +76,7 @@ public class TransactionService {
      * @throws IllegalArgumentException if transaction not found, not owned by user,
      *                                  or validation fails
      */
-    public TransactionDto updateTransaction(UUID transactionId, TransactionDto transactionDto) {
+    public TransactionDto updateTransaction(String transactionId, TransactionDto transactionDto) {
         // Automatically set username from authenticated user and prevent username
         // updates
         String username = SecurityUtils.getCurrentUserId();
@@ -108,7 +106,7 @@ public class TransactionService {
      * @return the transaction DTO if found and owned by user
      */
     @Transactional(readOnly = true)
-    public Optional<TransactionDto> getTransactionById(UUID transactionId) {
+    public Optional<TransactionDto> getTransactionById(String transactionId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting transaction with ID: {} for user: {}", transactionId, username);
 
@@ -132,7 +130,7 @@ public class TransactionService {
      * @throws IllegalArgumentException if transaction not found or not owned by
      *                                  user
      */
-    public void deleteTransaction(UUID transactionId) {
+    public void deleteTransaction(String transactionId) {
         String username = SecurityUtils.getCurrentUserId();
         log.info("Deleting transaction with ID: {} for user: {}", transactionId, username);
 
@@ -156,7 +154,7 @@ public class TransactionService {
      */
     @Transactional(readOnly = true)
     public Page<TransactionDto> getTransactionsByCriteria(
-            UUID walletId,
+            String walletId,
             LocalDate startDate,
             LocalDate endDate,
             TransactionType transactionType,

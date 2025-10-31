@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for Wallet entity operations.
@@ -20,7 +19,7 @@ import java.util.UUID;
  * Extends JpaRepository to inherit common database operations.
  */
 @Repository
-public interface WalletRepository extends JpaRepository<Wallet, UUID> {
+public interface WalletRepository extends JpaRepository<Wallet, String> {
 
     /**
      * Find all wallets belonging to a specific user.
@@ -113,5 +112,22 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
            "WHERE w.user.username = :username")
     @Modifying(clearAutomatically = true)
     @Transactional
-    void setDefaultWalletForUser(@Param("username") String username, @Param("walletId") UUID walletId);
+    void setDefaultWalletForUser(@Param("username") String username, @Param("walletId") String walletId);
+
+    /**
+     * Set the first remaining wallet (ordered by position) as default for a user.
+     * This is used when deleting the default wallet to automatically set another one as default.
+     * All other wallets for the user are set to non-default.
+     * 
+     * @param username the username of the user
+     * @param excludeWalletId the wallet ID to exclude (the one being deleted)
+     */
+    @Query("UPDATE Wallet w SET w.isDefault = CASE " +
+           "WHEN w.orderPosition = (SELECT MIN(w2.orderPosition) FROM Wallet w2 " +
+           "WHERE w2.user.username = :username AND w2.id != :excludeWalletId) THEN true " +
+           "ELSE false END " +
+           "WHERE w.user.username = :username")
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    void setFirstRemainingWalletAsDefault(@Param("username") String username, @Param("excludeWalletId") String excludeWalletId);
 }

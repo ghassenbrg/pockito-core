@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Service class for user management operations.
@@ -172,8 +171,9 @@ public class UserService {
             return;
         }
         
-        // Map to track original category ID -> new category ID for parent relationships
-        Map<UUID, UUID> categoryIdMapping = new HashMap<>();
+        // Map to track original category ID -> new category entity and ID for parent relationships
+        Map<String, Category> categoryEntityMapping = new HashMap<>();
+        Map<String, String> categoryIdMapping = new HashMap<>();
         
         // First pass: Create all categories without parent relationships
         for (Category systemCategory : systemCategories) {
@@ -187,27 +187,26 @@ public class UserService {
                     .systemAction(true) // Mark as system action for audit trail
                     .build();
             
+            // Ensure ID is null to prevent duplicate key exceptions - ID will be generated on persist
+            newCategory.setId(null);
             Category savedCategory = categoryRepository.save(newCategory);
+            categoryEntityMapping.put(systemCategory.getId(), savedCategory);
             categoryIdMapping.put(systemCategory.getId(), savedCategory.getId());
             
             log.debug("Created category '{}' for user '{}'", systemCategory.getName(), newUser.getUsername());
         }
         
-        // Second pass: Update parent relationships
+        // Second pass: Update parent relationships using the saved entities from first pass
         for (Category systemCategory : systemCategories) {
             if (systemCategory.getParentCategory() != null) {
-                UUID newParentId = categoryIdMapping.get(systemCategory.getParentCategory().getId());
-                UUID newCategoryId = categoryIdMapping.get(systemCategory.getId());
+                Category newCategory = categoryEntityMapping.get(systemCategory.getId());
+                Category newParentCategory = categoryEntityMapping.get(systemCategory.getParentCategory().getId());
                 
-                if (newParentId != null && newCategoryId != null) {
-                    Category newCategory = categoryRepository.findById(newCategoryId).orElse(null);
-                    Category newParentCategory = categoryRepository.findById(newParentId).orElse(null);
-                    
-                    if (newCategory != null && newParentCategory != null) {
-                        newCategory.setParentCategory(newParentCategory);
-                        categoryRepository.save(newCategory);
-                        log.debug("Set parent relationship for category '{}'", systemCategory.getName());
-                    }
+                if (newCategory != null && newParentCategory != null) {
+                    newCategory.setParentCategory(newParentCategory);
+                    // Use save to update the relationship - entity is already managed
+                    categoryRepository.save(newCategory);
+                    log.debug("Set parent relationship for category '{}'", systemCategory.getName());
                 }
             }
         }

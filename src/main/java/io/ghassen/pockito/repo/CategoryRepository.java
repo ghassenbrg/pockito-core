@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for Category entity operations.
@@ -18,7 +17,7 @@ import java.util.UUID;
  * Extends JpaRepository to inherit common database operations.
  */
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, UUID> {
+public interface CategoryRepository extends JpaRepository<Category, String> {
 
     /**
      * Find all categories belonging to a specific user.
@@ -51,7 +50,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @param parentCategoryId the parent category ID
      * @return list of child categories
      */
-    List<Category> findByParentCategoryIdOrderByNameAsc(UUID parentCategoryId);
+    List<Category> findByParentCategoryIdOrderByNameAsc(String parentCategoryId);
 
     /**
      * Find all child categories of a specific parent category for a user.
@@ -60,7 +59,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @param parentCategoryId the parent category ID
      * @return list of child categories owned by the user
      */
-    List<Category> findByUserUsernameAndParentCategoryIdOrderByNameAsc(String username, UUID parentCategoryId);
+    List<Category> findByUserUsernameAndParentCategoryIdOrderByNameAsc(String username, String parentCategoryId);
 
     /**
      * Check if a user has a category with a specific name.
@@ -114,7 +113,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @param parentCategoryId the parent category ID
      * @return list of categories with the specified parent
      */
-    List<Category> findByUserUsernameAndParentCategoryId(String username, UUID parentCategoryId);
+    List<Category> findByUserUsernameAndParentCategoryId(String username, String parentCategoryId);
 
     /**
      * Find all categories in a hierarchical tree for a user.

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -25,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import io.ghassen.pockito.domain.enums.TransactionType;
+import io.ghassen.pockito.web.validation.TransactionId;
 
 /**
  * Transaction entity representing a financial transaction between wallets.
@@ -56,8 +58,10 @@ import io.ghassen.pockito.domain.enums.TransactionType;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@TransactionId
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class Transaction extends AuditableEntity {
+
 
     /**
      * The user who owns this transaction.

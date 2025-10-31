@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * Response DTO for Category entity.
@@ -24,7 +23,7 @@ public class CategoryResponse {
     /**
      * Category unique identifier.
      */
-    private UUID id;
+    private String id;
 
     /**
      * Username of the category owner.
@@ -55,7 +54,7 @@ public class CategoryResponse {
      * ID of the parent category for hierarchical organization.
      * Null for root categories.
      */
-    private UUID parentCategoryId;
+    private String parentCategoryId;
 
     /**
      * Name of the parent category.

@@ -1,11 +1,12 @@
 package io.ghassen.pockito.web.types.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.ghassen.pockito.web.validation.WalletId;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Request DTO for reordering wallets.
@@ -16,7 +17,8 @@ public class ReorderWalletsRequest {
     @JsonProperty("walletIds")
     @NotNull(message = "Wallet IDs list cannot be null")
     @NotEmpty(message = "Wallet IDs list cannot be empty")
-    private List<UUID> walletIds;
+    @Valid
+    private List<@WalletId String> walletIds;
 
     /**
      * Default constructor.
@@ -29,7 +31,7 @@ public class ReorderWalletsRequest {
      *
      * @param walletIds the list of wallet IDs in the desired order
      */
-    public ReorderWalletsRequest(List<UUID> walletIds) {
+    public ReorderWalletsRequest(List<String> walletIds) {
         this.walletIds = walletIds;
     }
 
@@ -38,7 +40,7 @@ public class ReorderWalletsRequest {
      *
      * @return the list of wallet IDs
      */
-    public List<UUID> getWalletIds() {
+    public List<String> getWalletIds() {
         return walletIds;
     }
 
@@ -47,7 +49,7 @@ public class ReorderWalletsRequest {
      *
      * @param walletIds the list of wallet IDs
      */
-    public void setWalletIds(List<UUID> walletIds) {
+    public void setWalletIds(List<String> walletIds) {
         this.walletIds = walletIds;
     }
 

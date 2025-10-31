@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 
 import io.ghassen.pockito.domain.enums.CurrencyCode;
 import io.ghassen.pockito.domain.enums.WalletType;
+import io.ghassen.pockito.web.validation.WalletId;
 
 /**
  * Wallet entity representing a user's financial account or instrument.
@@ -57,6 +59,7 @@ import io.ghassen.pockito.domain.enums.WalletType;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@WalletId
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class Wallet extends AuditableEntity {
 

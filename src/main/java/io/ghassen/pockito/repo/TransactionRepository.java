@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Repository interface for Transaction entity.
@@ -21,7 +20,7 @@ import java.util.UUID;
  * balance calculations and transaction history queries.
  */
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
+public interface TransactionRepository extends JpaRepository<Transaction, String> {
 
     /**
      * Find all transactions for a specific user.
@@ -37,7 +36,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @param walletId the wallet ID to filter by
      * @return list of transactions where this wallet is the source
      */
-    List<Transaction> findByWalletFromIdOrderByEffectiveDateDesc(UUID walletId);
+    List<Transaction> findByWalletFromIdOrderByEffectiveDateDesc(String walletId);
 
     /**
      * Find all transactions where the wallet is the destination (walletTo).
@@ -45,7 +44,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @param walletId the wallet ID to filter by
      * @return list of transactions where this wallet is the destination
      */
-    List<Transaction> findByWalletToIdOrderByEffectiveDateDesc(UUID walletId);
+    List<Transaction> findByWalletToIdOrderByEffectiveDateDesc(String walletId);
 
     /**
      * Calculate the total amount of money that went OUT of a wallet (when wallet is source).
@@ -55,7 +54,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @return the total amount that went out of the wallet
      */
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.walletFrom.id = :walletId")
-    BigDecimal calculateTotalOutgoingAmount(@Param("walletId") UUID walletId);
+    BigDecimal calculateTotalOutgoingAmount(@Param("walletId") String walletId);
 
     /**
      * Calculate the total amount of money that came INTO a wallet (when wallet is destination).
@@ -65,7 +64,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @return the total amount that came into the wallet
      */
     @Query("SELECT COALESCE(SUM(t.amount * t.exchangeRate), 0) FROM Transaction t WHERE t.walletTo.id = :walletId")
-    BigDecimal calculateTotalIncomingAmount(@Param("walletId") UUID walletId);
+    BigDecimal calculateTotalIncomingAmount(@Param("walletId") String walletId);
 
     /**
      * Calculate the current balance of a wallet based on transactions.
@@ -78,7 +77,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
            "COALESCE((SELECT SUM(t.amount * t.exchangeRate) FROM Transaction t WHERE t.walletTo.id = :walletId), 0) - " +
            "COALESCE((SELECT SUM(t.amount) FROM Transaction t WHERE t.walletFrom.id = :walletId), 0) " +
            "FROM Wallet w WHERE w.id = :walletId")
-    BigDecimal calculateCurrentBalance(@Param("walletId") UUID walletId);
+    BigDecimal calculateCurrentBalance(@Param("walletId") String walletId);
 
     /**
      * Find all transactions for a specific user and wallet (either as source or destination).
@@ -90,7 +89,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     @Query("SELECT t FROM Transaction t WHERE t.user.username = :username " +
            "AND (t.walletFrom.id = :walletId OR t.walletTo.id = :walletId) " +
            "ORDER BY t.effectiveDate DESC")
-    List<Transaction> findByUserAndWallet(@Param("username") String username, @Param("walletId") UUID walletId);
+    List<Transaction> findByUserAndWallet(@Param("username") String username, @Param("walletId") String walletId);
 
     /**
      * Check if a wallet has any transactions.
@@ -99,7 +98,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @return true if the wallet has transactions, false otherwise
      */
     @Query("SELECT COUNT(t) > 0 FROM Transaction t WHERE t.walletFrom.id = :walletId OR t.walletTo.id = :walletId")
-    boolean hasTransactions(@Param("walletId") UUID walletId);
+    boolean hasTransactions(@Param("walletId") String walletId);
 
     /**
      * Find transactions for a specific user with pagination and filtering.
@@ -120,7 +119,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
            "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
     Page<Transaction> findByUserWithFilters(
             @Param("username") String username,
-            @Param("walletId") UUID walletId,
+            @Param("walletId") String walletId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("transactionType") TransactionType transactionType,
@@ -139,7 +138,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
            "ORDER BY t.effectiveDate DESC, t.createdAt DESC")
     Page<Transaction> findByUserAndWalletWithPagination(
             @Param("username") String username,
-            @Param("walletId") UUID walletId,
+            @Param("walletId") String walletId,
             Pageable pageable);
 
     /**
@@ -184,5 +183,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      * @return list of transactions involving the specified wallet
      */
     @Query("SELECT t FROM Transaction t WHERE t.walletFrom.id = :walletId OR t.walletTo.id = :walletId")
-    List<Transaction> findAllByWalletId(@Param("walletId") UUID walletId);
+    List<Transaction> findAllByWalletId(@Param("walletId") String walletId);
 }

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * Response DTO for Wallet entity.
@@ -26,7 +25,7 @@ public class WalletResponse {
     /**
      * Wallet unique identifier.
      */
-    private UUID id;
+    private String id;
 
     /**
      * Username of the wallet owner.

@@ -19,7 +19,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * REST controller for wallet operations.
@@ -95,7 +94,7 @@ public class WalletController {
      */
     @GetMapping("/{walletId}")
     public ResponseEntity<WalletResponse> getWallet(
-            @PathVariable UUID walletId,
+            @PathVariable String walletId,
             Authentication authentication) {
         
         String username = authentication.getName();
@@ -117,7 +116,7 @@ public class WalletController {
      */
     @PutMapping("/{walletId}")
     public ResponseEntity<WalletResponse> updateWallet(
-            @PathVariable UUID walletId,
+            @PathVariable String walletId,
             @Validated(ValidationGroups.Update.class) @RequestBody WalletRequest walletRequest,
             Authentication authentication) {
         
@@ -149,7 +148,7 @@ public class WalletController {
      */
     @DeleteMapping("/{walletId}")
     public ResponseEntity<Void> deleteWallet(
-            @PathVariable UUID walletId,
+            @PathVariable String walletId,
             Authentication authentication) {
         
         String username = authentication.getName();
@@ -218,7 +217,7 @@ public class WalletController {
      */
     @PostMapping("/{walletId}/set-default")
     public ResponseEntity<WalletResponse> setDefaultWallet(
-            @PathVariable UUID walletId,
+            @PathVariable String walletId,
             Authentication authentication) {
         
         String username = authentication.getName();

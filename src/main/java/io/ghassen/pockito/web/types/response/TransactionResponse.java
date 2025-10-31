@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.UUID;
 
 /**
  * Response DTO for Transaction entity.
@@ -27,7 +26,7 @@ public class TransactionResponse {
     /**
      * Transaction unique identifier.
      */
-    private UUID id;
+    private String id;
 
     /**
      * Username of the transaction owner.
@@ -42,7 +41,7 @@ public class TransactionResponse {
     /**
      * Source wallet ID for the transaction.
      */
-    private UUID walletFromId;
+    private String walletFromId;
 
     /**
      * Name of the source wallet.
@@ -52,7 +51,7 @@ public class TransactionResponse {
     /**
      * Destination wallet ID for the transaction.
      */
-    private UUID walletToId;
+    private String walletToId;
 
     /**
      * Name of the destination wallet.
@@ -91,7 +90,7 @@ public class TransactionResponse {
     /**
      * Category ID for the transaction.
      */
-    private UUID categoryId;
+    private String categoryId;
 
     /**
      * Name of the category.

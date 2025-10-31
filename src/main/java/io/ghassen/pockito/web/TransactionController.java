@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * REST controller for transaction operations.
@@ -88,7 +87,7 @@ public class TransactionController {
     )
     public ResponseEntity<TransactionResponse> updateTransaction(
             @Parameter(description = "Transaction ID to update") 
-            @PathVariable UUID transactionId,
+            @PathVariable String transactionId,
             @Validated(ValidationGroups.Update.class) @RequestBody TransactionRequest transactionRequest) {
         
         log.info("Updating transaction with ID: {}", transactionId);
@@ -123,7 +122,7 @@ public class TransactionController {
     )
     public ResponseEntity<TransactionResponse> getTransaction(
             @Parameter(description = "Transaction ID to retrieve") 
-            @PathVariable UUID transactionId) {
+            @PathVariable String transactionId) {
         
         log.debug("Getting transaction with ID: {}", transactionId);
         
@@ -147,7 +146,7 @@ public class TransactionController {
     )
     public ResponseEntity<Void> deleteTransaction(
             @Parameter(description = "Transaction ID to delete") 
-            @PathVariable UUID transactionId) {
+            @PathVariable String transactionId) {
         
         log.info("Deleting transaction with ID: {}", transactionId);
         
@@ -179,7 +178,7 @@ public class TransactionController {
     )
     public ResponseEntity<Page<TransactionDto>> listTransactions(
             @Parameter(description = "Wallet ID to filter by") 
-            @RequestParam(required = false) UUID walletId,
+            @RequestParam(required = false) String walletId,
             @Parameter(description = "Start date for date range filtering (yyyy-MM-dd)") 
             @RequestParam(required = false) 
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -246,7 +245,7 @@ public class TransactionController {
     )
     public ResponseEntity<Page<TransactionDto>> getTransactionsByWallet(
             @Parameter(description = "Wallet ID to filter by") 
-            @PathVariable UUID walletId,
+            @PathVariable String walletId,
             @PageableDefault(size = 20, sort = "effectiveDate", direction = Sort.Direction.DESC) Pageable pageable) {
         
         log.debug("Getting transactions for wallet: {}", walletId);

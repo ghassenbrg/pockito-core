@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import io.ghassen.pockito.domain.enums.CategoryType;
+import io.ghassen.pockito.web.validation.CategoryId;
 
 /**
  * Category entity representing a user-defined category for organizing transactions or other entities.
@@ -51,6 +53,7 @@ import io.ghassen.pockito.domain.enums.CategoryType;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@CategoryId
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class Category extends AuditableEntity {
 

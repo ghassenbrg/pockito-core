@@ -3,8 +3,6 @@ package io.ghassen.pockito.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,9 +66,15 @@ public class WalletService {
         int maxOrder = walletRepository.findMaxOrderPositionByUserUsername(username);
         walletDto.setOrderPosition(maxOrder + 1);
 
+        // Check if this is the user's first wallet
+        long walletCount = walletRepository.countByUserUsername(username);
+        boolean isFirstWallet = walletCount == 0;
+
         // Set default flag if not provided
-        if (walletDto.getIsDefault() == null) {
-            walletDto.setIsDefault(false);
+        if (isFirstWallet) {
+            // Force default to true for the very first wallet
+            walletDto.setIsDefault(true);
+            log.debug("This is the user's first wallet - automatically setting as default");
         }
 
         // Convert to entity and save
@@ -121,7 +125,7 @@ public class WalletService {
      * @return the wallet DTO if found and owned by user
      */
     @Transactional(readOnly = true)
-    public Optional<WalletDto> getWalletById(UUID walletId) {
+    public Optional<WalletDto> getWalletById(String walletId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting wallet with ID: {} for user: {}", walletId, username);
         Optional<WalletDto> walletDto = walletRepository.findById(walletId)
@@ -153,7 +157,7 @@ public class WalletService {
      * @throws IllegalArgumentException if wallet not found, not owned by user, or
      *                                  validation fails
      */
-    public WalletDto updateWallet(UUID walletId, WalletDto walletDto) {
+    public WalletDto updateWallet(String walletId, WalletDto walletDto) {
         // Automatically set username from authenticated user and prevent username
         // updates
         String username = SecurityUtils.getCurrentUserId();
@@ -207,7 +211,7 @@ public class WalletService {
      * @param walletId the wallet ID to delete
      * @throws IllegalArgumentException if wallet not found or not owned by user
      */
-    public void deleteWallet(UUID walletId) {
+    public void deleteWallet(String walletId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Deleting wallet with ID: {} for user: {}", walletId, username);
 
@@ -215,9 +219,13 @@ public class WalletService {
                 .filter(w -> w.getUser().getUsername().equals(username))
                 .orElseThrow(() -> new IllegalArgumentException("Wallet not found or access denied"));
 
-        // If this was the default wallet, we might want to set another one as default
+        // If this was the default wallet, set the first wallet (sorted by position) as the new default
         if (wallet.getIsDefault()) {
-            log.warn("Deleting default wallet for user: {}. Consider setting a new default wallet.", username);
+            log.warn("Deleting default wallet for user: {}. Setting first wallet as new default.", username);
+            
+            // Use JPQL UPDATE to set the first remaining wallet as default directly
+            walletRepository.setFirstRemainingWalletAsDefault(username, walletId);
+            log.info("Successfully set first wallet as new default for user: {}", username);
         }
 
         // Handle related transactions before deleting the wallet
@@ -240,7 +248,7 @@ public class WalletService {
      * @param walletId the wallet ID being deleted
      * @param username the username of the wallet owner
      */
-    private void handleRelatedTransactions(UUID walletId, String username) {
+    private void handleRelatedTransactions(String walletId, String username) {
         log.debug("Handling related transactions for wallet {} belonging to user {}", walletId, username);
         
         // Find all transactions that reference this wallet
@@ -272,10 +280,10 @@ public class WalletService {
      * @param transaction the transaction to handle
      * @param deletedWalletId the wallet ID being deleted
      */
-    private void handleTransaction(Transaction transaction, UUID deletedWalletId) {
+    private void handleTransaction(Transaction transaction, String deletedWalletId) {
         TransactionType type = transaction.getTransactionType();
-        UUID walletFromId = transaction.getWalletFrom() != null ? transaction.getWalletFrom().getId() : null;
-        UUID walletToId = transaction.getWalletTo() != null ? transaction.getWalletTo().getId() : null;
+        String walletFromId = transaction.getWalletFrom() != null ? transaction.getWalletFrom().getId() : null;
+        String walletToId = transaction.getWalletTo() != null ? transaction.getWalletTo().getId() : null;
         
         boolean isFromWallet = deletedWalletId.equals(walletFromId);
         boolean isToWallet = deletedWalletId.equals(walletToId);
@@ -372,7 +380,7 @@ public class WalletService {
      * @return the updated wallet DTO
      * @throws IllegalArgumentException if wallet not found or not owned by user
      */
-    public WalletDto setDefaultWallet(UUID walletId) {
+    public WalletDto setDefaultWallet(String walletId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Setting wallet with ID: {} as default for user: {}", walletId, username);
 
@@ -399,7 +407,7 @@ public class WalletService {
      * @param walletIds the list of wallet IDs in the new order
      * @throws IllegalArgumentException if any wallet not found or not owned by user
      */
-    public void reorderWallets(List<UUID> walletIds) {
+    public void reorderWallets(List<String> walletIds) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Reordering wallets for user: {}", username);
 
@@ -421,7 +429,7 @@ public class WalletService {
 
         // Update order positions
         for (int i = 0; i < walletIds.size(); i++) {
-            UUID walletId = walletIds.get(i);
+            String walletId = walletIds.get(i);
             Wallet wallet = wallets.stream()
                     .filter(w -> w.getId().equals(walletId))
                     .findFirst()

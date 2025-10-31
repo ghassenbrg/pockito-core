@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * REST controller for category operations.
@@ -190,7 +189,7 @@ public class CategoryController {
     )
     public ResponseEntity<CategoryResponse> getCategory(
             @Parameter(description = "Category ID") 
-            @PathVariable UUID categoryId) {
+            @PathVariable String categoryId) {
         
         log.debug("Getting category with ID: {}", categoryId);
         
@@ -214,7 +213,7 @@ public class CategoryController {
     )
     public ResponseEntity<CategoryListResponse> getChildCategories(
             @Parameter(description = "Parent category ID") 
-            @PathVariable UUID parentCategoryId) {
+            @PathVariable String parentCategoryId) {
         
         log.debug("Getting child categories for parent ID: {}", parentCategoryId);
         
@@ -293,7 +292,7 @@ public class CategoryController {
     )
     public ResponseEntity<CategoryResponse> updateCategory(
             @Parameter(description = "Category ID to update") 
-            @PathVariable UUID categoryId,
+            @PathVariable String categoryId,
             @Validated(ValidationGroups.Update.class) @RequestBody CategoryRequest categoryRequest) {
         
         log.info("Updating category with ID: {}", categoryId);
@@ -328,7 +327,7 @@ public class CategoryController {
     )
     public ResponseEntity<Void> deleteCategory(
             @Parameter(description = "Category ID to delete") 
-            @PathVariable UUID categoryId) {
+            @PathVariable String categoryId) {
         
         log.info("Deleting category with ID: {}", categoryId);
         

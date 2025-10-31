@@ -1,6 +1,8 @@
 package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.TransactionType;
+import io.ghassen.pockito.web.validation.CategoryId;
+import io.ghassen.pockito.web.validation.WalletId;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +14,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 /**
  * Request DTO for creating and updating transactions.
@@ -38,14 +39,16 @@ public class TransactionRequest {
      * Required for TRANSFER and EXPENSE transactions.
      * Can be NULL for INCOME transactions or external transfers.
      */
-    private UUID walletFromId;
+    @WalletId
+    private String walletFromId;
 
     /**
      * Destination wallet ID for the transaction.
      * Required for TRANSFER and INCOME transactions.
      * Can be NULL for EXPENSE transactions or external transfers.
      */
-    private UUID walletToId;
+    @WalletId
+    private String walletToId;
 
     /**
      * Base transaction amount in the source wallet's currency.
@@ -73,7 +76,8 @@ public class TransactionRequest {
      * Required for EXPENSE and INCOME transactions.
      * Not applicable for TRANSFER transactions.
      */
-    private UUID categoryId;
+    @CategoryId
+    private String categoryId;
 
     /**
      * Description or note for the transaction.

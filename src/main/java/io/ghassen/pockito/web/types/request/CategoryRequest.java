@@ -1,6 +1,7 @@
 package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.CategoryType;
+import io.ghassen.pockito.web.validation.CategoryId;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -9,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 /**
  * Request DTO for creating and updating categories.
@@ -55,5 +54,6 @@ public class CategoryRequest {
      * ID of the parent category for hierarchical organization.
      * Null for root categories.
      */
-    private UUID parentCategoryId;
+    @CategoryId
+    private String parentCategoryId;
 }

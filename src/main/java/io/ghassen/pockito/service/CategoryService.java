@@ -2,8 +2,6 @@ package io.ghassen.pockito.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +58,7 @@ public class CategoryService {
 
         // Convert to entity and save
         Category category = categoryMapper.toEntity(categoryDto);
+        category.setId(null);
         category.setUser(user);
 
         // Set parent category if specified
@@ -171,7 +170,7 @@ public class CategoryService {
      * @return the category DTO if found and owned by user
      */
     @Transactional(readOnly = true)
-    public Optional<CategoryDto> getCategoryById(UUID categoryId) {
+    public Optional<CategoryDto> getCategoryById(String categoryId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting category with ID: {} for user: {}", categoryId, username);
         Optional<CategoryDto> categoryDto = categoryRepository.findById(categoryId)
@@ -201,7 +200,7 @@ public class CategoryService {
      * @return list of child category DTOs
      */
     @Transactional(readOnly = true)
-    public List<CategoryDto> getChildCategories(UUID parentCategoryId) {
+    public List<CategoryDto> getChildCategories(String parentCategoryId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting child categories for parent ID: {} and user: {}", parentCategoryId, username);
         List<Category> categories = categoryRepository.findByUserUsernameAndParentCategoryIdOrderByNameAsc(username, parentCategoryId);
@@ -224,7 +223,7 @@ public class CategoryService {
      * @return the updated category DTO
      * @throws IllegalArgumentException if category not found, not owned by user, or validation fails
      */
-    public CategoryDto updateCategory(UUID categoryId, CategoryDto categoryDto) {
+    public CategoryDto updateCategory(String categoryId, CategoryDto categoryDto) {
         // Automatically set username from authenticated user and prevent username updates
         String username = SecurityUtils.getCurrentUserId();
         categoryDto.setUsername(username);
@@ -269,7 +268,7 @@ public class CategoryService {
      * @param categoryId the category ID to delete
      * @throws IllegalArgumentException if category not found, not owned by user, or has children
      */
-    public void deleteCategory(UUID categoryId) {
+    public void deleteCategory(String categoryId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Deleting category with ID: {} for user: {}", categoryId, username);
 
