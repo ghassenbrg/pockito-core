@@ -12,7 +12,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -27,16 +30,19 @@ public class GlobalExceptionHandler {
     }
     body.put("message", "Validation failed");
     body.put("fields", fields);
+    log.error("Validation failed: {}", ex.getMessage(), ex);
     return ResponseEntity.badRequest().body(body);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Object> handleIllegal(IllegalArgumentException ex) {
+    log.error("Illegal argument exception: {}", ex.getMessage(), ex);
     return problem(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
   @ExceptionHandler(IllegalStateException.class)
   public ResponseEntity<Object> handleIllegalState(IllegalStateException ex) {
+    log.error("Illegal state exception: {}", ex.getMessage(), ex);
     // Handle JWT authentication errors and other state-related issues
     if (ex.getMessage().contains("JWT") || ex.getMessage().contains("authentication")) {
       return problem(HttpStatus.UNAUTHORIZED, ex.getMessage());
@@ -46,11 +52,13 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<Object> handleNotFound(RuntimeException ex) {
+    log.error("Entity not found exception: {}", ex.getMessage(), ex);
     return problem(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Object> handleGeneric(Exception ex) {
+    log.error("Generic exception: {}", ex.getMessage(), ex);
     return problem(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
   }
 

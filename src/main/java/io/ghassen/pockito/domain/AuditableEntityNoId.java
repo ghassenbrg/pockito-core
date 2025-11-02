@@ -9,7 +9,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
 import io.ghassen.pockito.domain.util.PockitoIdGenerator;
-import io.ghassen.pockito.security.SecurityUtils;
+import io.ghassen.pockito.shared.security.SecurityUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
