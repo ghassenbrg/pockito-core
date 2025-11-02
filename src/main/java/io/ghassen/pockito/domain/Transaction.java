@@ -43,7 +43,7 @@ import io.ghassen.pockito.web.validation.TransactionId;
  * - Note field allows for additional transaction details
  */
 @Entity
-@Table(
+    @Table(
     name = "t_transaction",
     indexes = {
         @Index(columnList = "user_id", name = "idx_transaction_user_id"),
@@ -51,7 +51,8 @@ import io.ghassen.pockito.web.validation.TransactionId;
         @Index(columnList = "effective_date", name = "idx_transaction_effective_date"),
         @Index(columnList = "wallet_from_id", name = "idx_transaction_wallet_from"),
         @Index(columnList = "wallet_to_id", name = "idx_transaction_wallet_to"),
-        @Index(columnList = "category_id", name = "idx_transaction_category")
+        @Index(columnList = "category_id", name = "idx_transaction_category"),
+        @Index(columnList = "subscription_id", name = "idx_transaction_subscription")
     }
 )
 @Data
@@ -185,5 +186,20 @@ public class Transaction extends AuditableEntity {
         foreignKey = @ForeignKey(name = "fk_transaction_category")
     )
     private Category category;
+
+    /**
+     * Subscription that generated this transaction.
+     * If set, indicates this transaction was created from a subscription payment.
+     * When subscriptionId is set, walletFrom and walletTo can both be null
+     * (for automatic billing logic).
+     */
+    @ManyToOne(optional = true)
+    @JoinColumn(
+        name = "subscription_id",
+        referencedColumnName = "id",
+        nullable = true,
+        foreignKey = @ForeignKey(name = "fk_transaction_subscription")
+    )
+    private Subscription subscription;
 
 }

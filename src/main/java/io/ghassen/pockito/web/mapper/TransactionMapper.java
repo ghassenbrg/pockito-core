@@ -35,12 +35,14 @@ public interface TransactionMapper {
     @Mapping(source = "walletFrom.id", target = "walletFromId")
     @Mapping(source = "walletTo.id", target = "walletToId")
     @Mapping(source = "category.id", target = "categoryId")
+    @Mapping(source = "subscription.id", target = "subscriptionId")
+    @Mapping(source = "subscription.name", target = "subscriptionName")
     @Mapping(source = "walletFrom.name", target = "walletFromName")
     @Mapping(source = "walletTo.name", target = "walletToName")
     @Mapping(source = "walletFrom.currency", target = "walletFromCurrency")
     @Mapping(source = "walletTo.currency", target = "walletToCurrency")
     @Mapping(source = "category.name", target = "categoryName")
-    @Mapping(source = "category.iconUrl", target = "iconUrl")
+    @Mapping(expression = "java(transaction.getSubscription() != null ? transaction.getSubscription().getIconUrl() : (transaction.getCategory() != null ? transaction.getCategory().getIconUrl() : null))", target = "iconUrl")
     @Mapping(expression = "java(transaction.getWalletToAmount())", target = "walletToAmount")
     TransactionDto toDto(Transaction transaction);
 
@@ -55,6 +57,7 @@ public interface TransactionMapper {
     @Mapping(target = "walletFrom", ignore = true) // Wallet objects need to be set separately
     @Mapping(target = "walletTo", ignore = true)
     @Mapping(target = "category", ignore = true) // Category object needs to be set separately
+    @Mapping(target = "subscription", ignore = true) // Subscription object needs to be set separately
     @Mapping(target = "id", ignore = true) // ID is managed by the system
     @Mapping(target = "createdAt", ignore = true) // Audit fields are managed by the system
     @Mapping(target = "updatedAt", ignore = true)
@@ -75,6 +78,7 @@ public interface TransactionMapper {
     @Mapping(target = "walletFrom", ignore = true) // Wallet objects need to be set separately
     @Mapping(target = "walletTo", ignore = true)
     @Mapping(target = "category", ignore = true) // Category object needs to be set separately
+    @Mapping(target = "subscription", ignore = true) // Subscription object needs to be set separately
     @Mapping(target = "id", ignore = true) // ID should not be changed
     @Mapping(target = "createdAt", ignore = true) // Audit fields are managed by the system
     @Mapping(target = "createdBy", ignore = true)

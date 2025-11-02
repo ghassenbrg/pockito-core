@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.ghassen.pockito.domain.Category;
+import io.ghassen.pockito.domain.Subscription;
 import io.ghassen.pockito.domain.Transaction;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
 import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.repo.CategoryRepository;
+import io.ghassen.pockito.repo.SubscriptionRepository;
 import io.ghassen.pockito.repo.TransactionRepository;
 import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.repo.WalletRepository;
@@ -40,6 +42,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final CategoryRepository categoryRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final TransactionMapper transactionMapper;
 
     /**
@@ -262,6 +265,13 @@ public class TransactionService {
      * @throws IllegalArgumentException if validation fails
      */
     private void validateTransactionTypeRules(TransactionDto transactionDto) {
+        // Special rule: if subscriptionId is set, walletFrom and walletTo can both be null
+        if (transactionDto.getSubscriptionId() != null) {
+            log.debug("Transaction has subscriptionId set, allowing walletFrom and walletTo to be null");
+            // Still need to validate other fields, but skip wallet validation
+            return;
+        }
+
         TransactionType type = transactionDto.getTransactionType();
 
         switch (type) {
@@ -339,6 +349,14 @@ public class TransactionService {
                     .filter(cat -> cat.getUser().getUsername().equals(username))
                     .orElseThrow(() -> new IllegalArgumentException("Category not found or access denied"));
             transaction.setCategory(category);
+        }
+
+        // Set subscription if provided
+        if (transactionDto.getSubscriptionId() != null) {
+            Subscription subscription = subscriptionRepository.findById(transactionDto.getSubscriptionId())
+                    .filter(sub -> sub.getUser().getUsername().equals(username))
+                    .orElseThrow(() -> new IllegalArgumentException("Subscription not found or access denied"));
+            transaction.setSubscription(subscription);
         }
     }
 

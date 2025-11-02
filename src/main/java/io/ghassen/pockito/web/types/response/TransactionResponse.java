@@ -113,6 +113,16 @@ public class TransactionResponse {
     private LocalDate effectiveDate;
 
     /**
+     * Subscription ID that generated this transaction.
+     */
+    private String subscriptionId;
+
+    /**
+     * Name of the subscription that generated this transaction.
+     */
+    private String subscriptionName;
+
+    /**
      * When the transaction was created.
      */
     private Instant createdAt;
