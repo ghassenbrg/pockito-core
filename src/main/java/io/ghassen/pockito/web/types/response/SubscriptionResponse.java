@@ -87,7 +87,14 @@ public class SubscriptionResponse {
     private LocalDate endDate;
 
     /**
-     * Whether the subscription is currently active.
+     * Whether the subscription is currently enabled.
+     */
+    private Boolean enabled;
+
+    /**
+     * Whether the subscription is currently active (computed field).
+     * Calculated based on enabled + startDate <= today + (endDate >= today OR null).
+     * This is a read-only field computed by the service layer.
      */
     private Boolean isActive;
 

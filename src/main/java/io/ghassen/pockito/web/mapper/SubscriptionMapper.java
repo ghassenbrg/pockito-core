@@ -37,6 +37,7 @@ public interface SubscriptionMapper {
     @Mapping(source = "defaultWalletId.id", target = "defaultWalletId")
     @Mapping(source = "defaultWalletId.name", target = "defaultWalletName")
     @Mapping(target = "monthlyEquivalentAmount", ignore = true) // Will be calculated in service
+    @Mapping(target = "isActive", ignore = true) // Will be calculated in service
     SubscriptionDto toDto(Subscription subscription);
 
     /**

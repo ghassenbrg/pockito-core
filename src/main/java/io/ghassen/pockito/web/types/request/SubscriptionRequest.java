@@ -94,10 +94,10 @@ public class SubscriptionRequest {
     private LocalDate endDate;
 
     /**
-     * Whether the subscription is currently active.
+     * Whether the subscription is currently enabled.
      */
-    @NotNull(message = "Is active is required")
-    private Boolean isActive;
+    @NotNull(message = "Enabled is required")
+    private Boolean enabled;
 
     /**
      * Category ID for the subscription expense.

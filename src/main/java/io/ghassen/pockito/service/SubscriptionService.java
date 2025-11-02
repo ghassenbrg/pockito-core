@@ -320,8 +320,8 @@ public class SubscriptionService {
                 .filter(sub -> sub.getUser().getUsername().equals(username))
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found or access denied"));
 
-        if (!subscription.getIsActive()) {
-            throw new IllegalArgumentException("Cannot pay for inactive subscription");
+        if (!subscription.getEnabled()) {
+            throw new IllegalArgumentException("Cannot pay for disabled subscription");
         }
 
         // Determine wallet to charge
@@ -572,5 +572,13 @@ public class SubscriptionService {
                     subscription.getInterval());
             subscriptionDto.setMonthlyEquivalentAmount(monthlyEquivalent);
         }
+
+        // Calculate isActive based on enabled (DB value), start date, and end date
+        LocalDate today = LocalDate.now();
+        Boolean calculatedIsActive = subscription.getEnabled() != null && subscription.getEnabled()
+                && subscription.getStartDate() != null
+                && !subscription.getStartDate().isAfter(today)
+                && (subscription.getEndDate() == null || !subscription.getEndDate().isBefore(today));
+        subscriptionDto.setIsActive(calculatedIsActive);
     }
 }

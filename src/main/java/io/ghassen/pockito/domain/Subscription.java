@@ -56,7 +56,7 @@ import jakarta.persistence.Convert;
         @Index(columnList = "user_id", name = "idx_subscription_user_id"),
         @Index(columnList = "category_id", name = "idx_subscription_category"),
         @Index(columnList = "default_wallet_id", name = "idx_subscription_default_wallet"),
-        @Index(columnList = "is_active", name = "idx_subscription_is_active"),
+        @Index(columnList = "enabled", name = "idx_subscription_enabled"),
         @Index(columnList = "next_due_date", name = "idx_subscription_next_due_date")
     }
 )
@@ -169,13 +169,13 @@ public class Subscription extends AuditableEntity {
     private LocalDate endDate;
 
     /**
-     * Whether the subscription is currently active.
+     * Whether the subscription is currently enabled.
      * Required field, defaults to true.
      */
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "enabled", nullable = false)
     @NotNull
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean enabled = true;
 
     /**
      * Category ID for the subscription expense.
