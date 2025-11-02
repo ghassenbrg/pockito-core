@@ -183,17 +183,19 @@ public class SubscriptionController {
      * Process a payment for a subscription.
      * 
      * Creates a new EXPENSE transaction and updates the subscription's nextDueDate.
+     * If skip is true in the request, skips payment and transaction creation, only updates nextDueDate and lastPaymentDate.
      * 
      * @param subscriptionId the subscription ID
-     * @param payRequest the payment request containing the wallet ID and exchange rate (optional)
-     * @return the created transaction
+     * @param payRequest the payment request containing the wallet ID, exchange rate (optional), and skip flag (optional)
+     * @return the created transaction, or 204 No Content if skip is true
      */
     @PostMapping("/{subscriptionId}/pay")
     @PreAuthorize("isAuthenticated()")
     @Operation(
         summary = "Pay subscription",
         description = "Processes a payment for a subscription. Creates a new EXPENSE transaction and updates the subscription's nextDueDate. " +
-                "Exchange rate is only used if subscription currency differs from wallet currency, otherwise it's ignored."
+                "Exchange rate is only used if subscription currency differs from wallet currency, otherwise it's ignored. " +
+                "If skip is true, skips payment and transaction creation, only updates nextDueDate and lastPaymentDate."
     )
     public ResponseEntity<TransactionResponse> paySubscription(
             @Parameter(description = "Subscription ID to pay") 
@@ -204,9 +206,15 @@ public class SubscriptionController {
         
         String walletId = payRequest != null ? payRequest.getWalletId() : null;
         java.math.BigDecimal exchangeRate = payRequest != null ? payRequest.getExchangeRate() : null;
+        Boolean skip = payRequest != null && payRequest.getSkip() != null ? payRequest.getSkip() : false;
         
         try {
-            TransactionDto transactionDto = subscriptionService.paySubscription(subscriptionId, walletId, exchangeRate);
+            TransactionDto transactionDto = subscriptionService.paySubscription(subscriptionId, walletId, exchangeRate, skip);
+            
+            // If skip is true, transactionDto will be null
+            if (skip && transactionDto == null) {
+                return ResponseEntity.noContent().build();
+            }
             
             // Convert DTO to response
             TransactionResponse transactionResponse = transactionMapper.dtoToResponse(transactionDto);

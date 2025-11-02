@@ -38,5 +38,12 @@ public class PaySubscriptionRequest {
     @Digits(integer = 11, fraction = 6, message = "Exchange rate must have at most 11 digits and 6 decimal places")
     @DecimalMin(value = "0.000001", message = "Exchange rate must be greater than 0")
     private BigDecimal exchangeRate;
+
+    /**
+     * Skip flag - when true, skip payment and transaction creation.
+     * Only calculates nextDueDate and sets lastPaymentDate without creating a transaction.
+     * Optional - defaults to false if not provided.
+     */
+    private Boolean skip;
 }
 

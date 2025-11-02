@@ -301,19 +301,22 @@ public class SubscriptionService {
      * Process a payment for a subscription.
      * 
      * Creates a new EXPENSE transaction and updates the subscription's nextDueDate.
+     * If skip is true, skips payment and transaction creation, only updates nextDueDate and lastPaymentDate.
      * 
      * @param subscriptionId the subscription ID
      * @param walletId       the wallet ID to charge (overrides defaultWalletId)
      * @param exchangeRate   the exchange rate to use (only if subscription currency
      *                       differs from wallet currency)
-     * @return the created transaction DTO
+     * @param skip           if true, skip payment and transaction creation, only update dates
+     * @return the created transaction DTO, or null if skip is true
      * @throws IllegalArgumentException if subscription not found, not owned by
      *                                  user, or wallet not found
      */
-    public TransactionDto paySubscription(String subscriptionId, String walletId, BigDecimal exchangeRate) {
+    public TransactionDto paySubscription(String subscriptionId, String walletId, BigDecimal exchangeRate, Boolean skip) {
         String username = SecurityUtils.getCurrentUserId();
-        log.debug("Processing payment for subscription ID: {} with wallet ID: {} and exchange rate: {} for user: {}",
-                subscriptionId, walletId, exchangeRate, username);
+        boolean shouldSkip = skip != null && skip;
+        log.debug("Processing payment for subscription ID: {} with wallet ID: {} and exchange rate: {} for user: {}, skip: {}",
+                subscriptionId, walletId, exchangeRate, username, shouldSkip);
 
         // Get subscription and verify ownership
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
@@ -322,6 +325,39 @@ public class SubscriptionService {
 
         if (!subscription.getEnabled()) {
             throw new IllegalArgumentException("Cannot pay for disabled subscription");
+        }
+
+        // If skip is true, skip all payment and transaction logic
+        if (shouldSkip) {
+            log.info("Skipping payment for subscription ID: {} - only updating dates", subscriptionId);
+            
+            // Set lastPaymentDate to nextDueDate (treating skip as if payment was made)
+            LocalDate paymentDate = subscription.getNextDueDate();
+            subscription.setLastPaymentDate(paymentDate);
+            
+            // Update subscription's nextDueDate
+            // Use lastPaymentDate as base date if it's set (not null), otherwise use startDate
+            LocalDate baseDate = subscription.getLastPaymentDate() != null
+                    ? subscription.getLastPaymentDate()
+                    : subscription.getStartDate();
+
+            // Always recalculate nextDueDate when payment is skipped
+            LocalDate nextDueDate = calculateNextDueDate(
+                    baseDate,
+                    subscription.getFrequency(),
+                    subscription.getInterval(),
+                    subscription.getDayOfMonth(),
+                    subscription.getDayOfWeek(),
+                    subscription.getMonthOfYear());
+            subscription.setNextDueDate(nextDueDate);
+
+            subscriptionRepository.save(subscription);
+            log.info(
+                    "Skipped payment - Updated subscription nextDueDate to: {} (calculated from base date: {}) and lastPaymentDate to: {} for subscription ID: {}",
+                    nextDueDate, baseDate, paymentDate, subscriptionId);
+
+            // Return null since no transaction was created
+            return null;
         }
 
         // Determine wallet to charge
