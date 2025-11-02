@@ -76,6 +76,12 @@ public class SubscriptionResponse {
     private LocalDate nextDueDate;
 
     /**
+     * Last payment date for the subscription.
+     * Set when a payment is successfully processed and transaction is created.
+     */
+    private LocalDate lastPaymentDate;
+
+    /**
      * End date of the subscription (if applicable).
      */
     private LocalDate endDate;

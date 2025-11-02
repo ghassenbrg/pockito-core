@@ -147,11 +147,19 @@ public class Subscription extends AuditableEntity {
 
     /**
      * Next due date for the subscription charge.
-     * Required field, calculated based on frequency and interval.
+     * Optional field, calculated based on frequency and interval.
+     * Can be null if the subscription has ended (endDate is set before the nextDueDate).
      */
-    @Column(name = "next_due_date", nullable = false)
-    @NotNull
+    @Column(name = "next_due_date", nullable = true)
     private LocalDate nextDueDate;
+
+    /**
+     * Last payment date for the subscription.
+     * Optional field, set when a payment is successfully processed and transaction is created.
+     * Only updated when pay service API is successful and transaction created.
+     */
+    @Column(name = "last_payment_date", nullable = true)
+    private LocalDate lastPaymentDate;
 
     /**
      * End date of the subscription (if applicable).

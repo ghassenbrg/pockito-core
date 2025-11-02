@@ -3,9 +3,6 @@ package io.ghassen.pockito.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-
-import io.ghassen.pockito.domain.enums.DayOfWeek;
-import io.ghassen.pockito.domain.enums.MonthOfYear;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +14,8 @@ import io.ghassen.pockito.domain.Subscription;
 import io.ghassen.pockito.domain.Transaction;
 import io.ghassen.pockito.domain.User;
 import io.ghassen.pockito.domain.Wallet;
+import io.ghassen.pockito.domain.enums.DayOfWeek;
+import io.ghassen.pockito.domain.enums.MonthOfYear;
 import io.ghassen.pockito.domain.enums.SubscriptionFrequency;
 import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.repo.CategoryRepository;
@@ -26,16 +25,17 @@ import io.ghassen.pockito.repo.UserRepository;
 import io.ghassen.pockito.repo.WalletRepository;
 import io.ghassen.pockito.security.SecurityUtils;
 import io.ghassen.pockito.web.mapper.SubscriptionMapper;
+import io.ghassen.pockito.web.mapper.TransactionMapper;
 import io.ghassen.pockito.web.types.dto.SubscriptionDto;
 import io.ghassen.pockito.web.types.dto.TransactionDto;
-import io.ghassen.pockito.web.mapper.TransactionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service class for subscription business operations.
  * 
- * Provides business logic for subscription management including CRUD operations,
+ * Provides business logic for subscription management including CRUD
+ * operations,
  * payment processing, and subscription scheduling.
  */
 @Service
@@ -63,7 +63,7 @@ public class SubscriptionService {
         // Automatically set username from authenticated user
         String username = SecurityUtils.getCurrentUserId();
         subscriptionDto.setUsername(username);
-        
+
         log.debug("Creating subscription for user: {}", username);
 
         // Validate user exists
@@ -87,18 +87,30 @@ public class SubscriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("Default wallet not found or access denied"));
         subscription.setDefaultWalletId(defaultWallet);
 
-        // Calculate nextDueDate if not provided
-        if (subscriptionDto.getNextDueDate() == null) {
-            LocalDate nextDueDate = calculateNextDueDate(
+        // Always calculate nextDueDate when creating a new subscription
+        // However, if endDate is set and is before or equal to the calculated
+        // nextDueDate, set nextDueDate to null
+        LocalDate calculatedNextDueDate = calculateNextDueDate(
                 subscriptionDto.getStartDate(),
                 subscriptionDto.getFrequency(),
                 subscriptionDto.getInterval(),
                 subscriptionDto.getDayOfMonth(),
                 subscriptionDto.getDayOfWeek(),
-                subscriptionDto.getMonthOfYear()
-            );
-            subscription.setNextDueDate(nextDueDate);
-            subscriptionDto.setNextDueDate(nextDueDate);
+                subscriptionDto.getMonthOfYear());
+
+        // Check if endDate is set to a value before the calculated nextDueDate
+        if (subscriptionDto.getEndDate() != null &&
+                subscriptionDto.getEndDate().isBefore(calculatedNextDueDate)) {
+            subscription.setNextDueDate(null);
+            subscriptionDto.setNextDueDate(null);
+            log.debug("endDate {} is before calculated nextDueDate {}, setting nextDueDate to null on creation",
+                    subscriptionDto.getEndDate(), calculatedNextDueDate);
+        } else if (subscriptionDto.getNextDueDate() != null) {
+            // If explicitly provided in DTO, use it
+            subscription.setNextDueDate(subscriptionDto.getNextDueDate());
+        } else {
+            subscription.setNextDueDate(calculatedNextDueDate);
+            subscriptionDto.setNextDueDate(calculatedNextDueDate);
         }
 
         Subscription savedSubscription = subscriptionRepository.save(subscription);
@@ -112,16 +124,17 @@ public class SubscriptionService {
     /**
      * Update an existing subscription for the authenticated user.
      * 
-     * @param subscriptionId the subscription ID to update
+     * @param subscriptionId  the subscription ID to update
      * @param subscriptionDto the updated subscription data
      * @return the updated subscription DTO
-     * @throws IllegalArgumentException if subscription not found, not owned by user, or validation fails
+     * @throws IllegalArgumentException if subscription not found, not owned by
+     *                                  user, or validation fails
      */
     public SubscriptionDto updateSubscription(String subscriptionId, SubscriptionDto subscriptionDto) {
         // Automatically set username from authenticated user
         String username = SecurityUtils.getCurrentUserId();
         subscriptionDto.setUsername(username);
-        
+
         log.debug("Updating subscription with ID: {} for user: {}", subscriptionId, username);
 
         Subscription existingSubscription = subscriptionRepository.findById(subscriptionId)
@@ -147,24 +160,37 @@ public class SubscriptionService {
             existingSubscription.setDefaultWalletId(defaultWallet);
         }
 
-        // Recalculate nextDueDate if frequency, interval, or startDate changed
-        // For simplicity, we always recalculate if nextDueDate is not explicitly provided
-        if (subscriptionDto.getNextDueDate() == null) {
-            LocalDate nextDueDate = calculateNextDueDate(
-                existingSubscription.getStartDate(),
+        LocalDate baseDate = existingSubscription.getLastPaymentDate() != null
+                && existingSubscription.getLastPaymentDate().isAfter(existingSubscription.getStartDate())
+                        ? existingSubscription.getLastPaymentDate()
+                        : existingSubscription.getStartDate();
+
+        LocalDate nextDueDate = calculateNextDueDate(
+                baseDate,
                 existingSubscription.getFrequency(),
                 existingSubscription.getInterval(),
                 existingSubscription.getDayOfMonth(),
                 existingSubscription.getDayOfWeek(),
-                existingSubscription.getMonthOfYear()
-            );
+                existingSubscription.getMonthOfYear());
+
+        // If endDate exists and the calculated nextDueDate is after or equal to
+        // endDate, set nextDueDate to null
+        if (existingSubscription.getEndDate() != null &&
+                nextDueDate.isAfter(existingSubscription.getEndDate())) {
+            existingSubscription.setNextDueDate(null);
+            log.debug("Calculated nextDueDate {} is before or equal to endDate {}, setting nextDueDate to null",
+                    nextDueDate, existingSubscription.getEndDate());
+        } else {
             existingSubscription.setNextDueDate(nextDueDate);
+            log.debug("Calculated new nextDueDate: {}", nextDueDate);
         }
 
-        Subscription updatedSubscription = subscriptionRepository.save(existingSubscription);
+        Subscription updatedSubscription = subscriptionRepository.save(
+                existingSubscription);
         log.info("Updated subscription with ID: {} for user: {}", subscriptionId, username);
 
         SubscriptionDto updatedSubscriptionDto = subscriptionMapper.toDto(updatedSubscription);
+
         setDerivedFields(updatedSubscriptionDto, updatedSubscription);
         return updatedSubscriptionDto;
     }
@@ -179,11 +205,11 @@ public class SubscriptionService {
     public Optional<SubscriptionDto> getSubscription(String subscriptionId) {
         String username = SecurityUtils.getCurrentUserId();
         log.debug("Getting subscription with ID: {} for user: {}", subscriptionId, username);
-        
+
         Optional<SubscriptionDto> subscriptionDto = subscriptionRepository.findById(subscriptionId)
                 .filter(sub -> sub.getUser().getUsername().equals(username))
                 .map(subscriptionMapper::toDto);
-        
+
         if (subscriptionDto.isPresent()) {
             // Set derived fields for the subscription
             Subscription subscription = subscriptionRepository.findById(subscriptionId)
@@ -196,7 +222,7 @@ public class SubscriptionService {
         } else {
             log.info("Subscription with ID: {} not found or access denied for user: {}", subscriptionId, username);
         }
-        
+
         return subscriptionDto;
     }
 
@@ -211,12 +237,12 @@ public class SubscriptionService {
         log.debug("Getting subscriptions for user: {}", username);
         List<Subscription> subscriptions = subscriptionRepository.findByUserUsernameOrderByNameAsc(username);
         List<SubscriptionDto> subscriptionDtos = subscriptionMapper.toDtoList(subscriptions);
-        
+
         // Set derived fields for each subscription
         for (int i = 0; i < subscriptions.size(); i++) {
             setDerivedFields(subscriptionDtos.get(i), subscriptions.get(i));
         }
-        
+
         log.info("Retrieved {} subscriptions for user: {}", subscriptionDtos.size(), username);
         return subscriptionDtos;
     }
@@ -225,7 +251,8 @@ public class SubscriptionService {
      * Delete a subscription for the authenticated user.
      * 
      * @param subscriptionId the subscription ID to delete
-     * @throws IllegalArgumentException if subscription not found or not owned by user
+     * @throws IllegalArgumentException if subscription not found or not owned by
+     *                                  user
      */
     public void deleteSubscription(String subscriptionId) {
         String username = SecurityUtils.getCurrentUserId();
@@ -245,14 +272,16 @@ public class SubscriptionService {
      * Creates a new EXPENSE transaction and updates the subscription's nextDueDate.
      * 
      * @param subscriptionId the subscription ID
-     * @param walletId the wallet ID to charge (overrides defaultWalletId)
-     * @param exchangeRate the exchange rate to use (only if subscription currency differs from wallet currency)
+     * @param walletId       the wallet ID to charge (overrides defaultWalletId)
+     * @param exchangeRate   the exchange rate to use (only if subscription currency
+     *                       differs from wallet currency)
      * @return the created transaction DTO
-     * @throws IllegalArgumentException if subscription not found, not owned by user, or wallet not found
+     * @throws IllegalArgumentException if subscription not found, not owned by
+     *                                  user, or wallet not found
      */
     public TransactionDto paySubscription(String subscriptionId, String walletId, BigDecimal exchangeRate) {
         String username = SecurityUtils.getCurrentUserId();
-        log.debug("Processing payment for subscription ID: {} with wallet ID: {} and exchange rate: {} for user: {}", 
+        log.debug("Processing payment for subscription ID: {} with wallet ID: {} and exchange rate: {} for user: {}",
                 subscriptionId, walletId, exchangeRate, username);
 
         // Get subscription and verify ownership
@@ -280,19 +309,21 @@ public class SubscriptionService {
 
         // Calculate transaction amount based on exchange rate if currencies differ
         BigDecimal transactionAmount;
-        
+
         if (!subscription.getCurrency().equals(wallet.getCurrency())) {
             // Currencies differ, use provided exchange rate to calculate amount
             if (exchangeRate != null) {
                 // Calculate amount in wallet currency: subscription amount * exchange rate
                 transactionAmount = subscription.getAmount().multiply(exchangeRate)
                         .setScale(2, RoundingMode.HALF_UP);
-                log.debug("Using provided exchange rate: {} to calculate transaction amount: {} {} (subscription amount: {} {})",
-                        exchangeRate, transactionAmount, wallet.getCurrency(), 
+                log.debug(
+                        "Using provided exchange rate: {} to calculate transaction amount: {} {} (subscription amount: {} {})",
+                        exchangeRate, transactionAmount, wallet.getCurrency(),
                         subscription.getAmount(), subscription.getCurrency());
             } else {
                 transactionAmount = subscription.getAmount();
-                log.warn("Currencies differ but no exchange rate provided. Using subscription amount as-is (subscription: {} {}, wallet: {})",
+                log.warn(
+                        "Currencies differ but no exchange rate provided. Using subscription amount as-is (subscription: {} {}, wallet: {})",
                         subscription.getAmount(), subscription.getCurrency(), wallet.getCurrency());
             }
         } else {
@@ -320,34 +351,51 @@ public class SubscriptionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("Created transaction with ID: {} for subscription ID: {}", savedTransaction.getId(), subscriptionId);
 
+        // Set lastPaymentDate to nextDueDate when payment is successful and transaction
+        // is created
+        LocalDate paymentDate = subscription.getNextDueDate();
+        subscription.setLastPaymentDate(paymentDate);
+
         // Update subscription's nextDueDate
+        // Use lastPaymentDate as base date if it's set (not null), otherwise use
+        // startDate
+        // Since we just set lastPaymentDate to paymentDate, we use paymentDate as the
+        // base
+        LocalDate baseDate = subscription.getLastPaymentDate() != null
+                ? subscription.getLastPaymentDate()
+                : subscription.getStartDate();
+
+        // Always recalculate nextDueDate when payment is made
         LocalDate nextDueDate = calculateNextDueDate(
-            subscription.getNextDueDate(), // Use current nextDueDate as base
-            subscription.getFrequency(),
-            subscription.getInterval(),
-            subscription.getDayOfMonth(),
-            subscription.getDayOfWeek(),
-            subscription.getMonthOfYear()
-        );
+                baseDate,
+                subscription.getFrequency(),
+                subscription.getInterval(),
+                subscription.getDayOfMonth(),
+                subscription.getDayOfWeek(),
+                subscription.getMonthOfYear());
         subscription.setNextDueDate(nextDueDate);
+
         subscriptionRepository.save(subscription);
-        log.info("Updated subscription nextDueDate to: {} for subscription ID: {}", nextDueDate, subscriptionId);
+        log.info(
+                "Updated subscription nextDueDate to: {} (calculated from base date: {}) and lastPaymentDate to: {} for subscription ID: {}",
+                nextDueDate, baseDate, paymentDate, subscriptionId);
 
         return transactionMapper.toDto(savedTransaction);
     }
 
     /**
-     * Calculate the next due date based on frequency, interval, and optional scheduling fields.
+     * Calculate the next due date based on frequency, interval, and optional
+     * scheduling fields.
      * 
-     * @param baseDate the base date to calculate from
-     * @param frequency the frequency unit
-     * @param interval the interval value
-     * @param dayOfMonth optional day of month (1-31) for MONTHLY frequency
-     * @param dayOfWeek optional day of week (1-7) for WEEKLY frequency
+     * @param baseDate    the base date to calculate from
+     * @param frequency   the frequency unit
+     * @param interval    the interval value
+     * @param dayOfMonth  optional day of month (1-31) for MONTHLY frequency
+     * @param dayOfWeek   optional day of week (1-7) for WEEKLY frequency
      * @param monthOfYear optional month of year (1-12) for YEARLY frequency
      * @return the calculated next due date
      */
-    private LocalDate calculateNextDueDate(LocalDate baseDate, SubscriptionFrequency frequency, 
+    private LocalDate calculateNextDueDate(LocalDate baseDate, SubscriptionFrequency frequency,
             Integer interval, Integer dayOfMonth, DayOfWeek dayOfWeek, MonthOfYear monthOfYear) {
         LocalDate nextDueDate = baseDate;
 
@@ -376,10 +424,10 @@ public class SubscriptionService {
             case MONTHLY:
                 if (dayOfMonth != null) {
                     // Find the next occurrence of the specified day of month
-                    nextDueDate = baseDate.plusMonths(interval);
+                    nextDueDate = baseDate;
                     int targetDay = Math.min(dayOfMonth, nextDueDate.lengthOfMonth());
                     nextDueDate = nextDueDate.withDayOfMonth(targetDay);
-                    
+
                     // If the calculated date is before the base date, move to next interval
                     if (nextDueDate.isBefore(baseDate) || nextDueDate.isEqual(baseDate)) {
                         nextDueDate = nextDueDate.plusMonths(interval);
@@ -394,11 +442,11 @@ public class SubscriptionService {
             case YEARLY:
                 if (monthOfYear != null && dayOfMonth != null) {
                     // Find the next occurrence of the specified month and day
-                    nextDueDate = baseDate.plusYears(interval);
+                    nextDueDate = baseDate;
                     nextDueDate = nextDueDate.withMonth(monthOfYear.getValue());
                     int targetDay = Math.min(dayOfMonth, nextDueDate.lengthOfMonth());
                     nextDueDate = nextDueDate.withDayOfMonth(targetDay);
-                    
+
                     // If the calculated date is before the base date, move to next interval
                     if (nextDueDate.isBefore(baseDate) || nextDueDate.isEqual(baseDate)) {
                         nextDueDate = nextDueDate.plusYears(interval);
@@ -409,7 +457,7 @@ public class SubscriptionService {
                 } else if (monthOfYear != null) {
                     nextDueDate = baseDate.plusYears(interval);
                     nextDueDate = nextDueDate.withMonth(monthOfYear.getValue());
-                    
+
                     // If the calculated date is before the base date, move to next interval
                     if (nextDueDate.isBefore(baseDate) || nextDueDate.isEqual(baseDate)) {
                         nextDueDate = nextDueDate.plusYears(interval);
@@ -426,23 +474,26 @@ public class SubscriptionService {
     /**
      * Calculate the monthly equivalent amount for a subscription.
      * 
-     * @param amount the subscription amount
+     * @param amount    the subscription amount
      * @param frequency the frequency unit
-     * @param interval the interval value
+     * @param interval  the interval value
      * @return the monthly equivalent amount
      */
-    private BigDecimal calculateMonthlyEquivalentAmount(BigDecimal amount, SubscriptionFrequency frequency, Integer interval) {
+    private BigDecimal calculateMonthlyEquivalentAmount(BigDecimal amount, SubscriptionFrequency frequency,
+            Integer interval) {
         BigDecimal monthlyEquivalent;
-        
+
         switch (frequency) {
             case DAILY:
                 // Convert daily to monthly: amount * 30 / interval
-                monthlyEquivalent = amount.multiply(BigDecimal.valueOf(30)).divide(BigDecimal.valueOf(interval), 2, RoundingMode.HALF_UP);
+                monthlyEquivalent = amount.multiply(BigDecimal.valueOf(30)).divide(BigDecimal.valueOf(interval), 2,
+                        RoundingMode.HALF_UP);
                 break;
 
             case WEEKLY:
                 // Convert weekly to monthly: amount * 4.33 / interval (average weeks per month)
-                monthlyEquivalent = amount.multiply(BigDecimal.valueOf(4.33)).divide(BigDecimal.valueOf(interval), 2, RoundingMode.HALF_UP);
+                monthlyEquivalent = amount.multiply(BigDecimal.valueOf(4.33)).divide(BigDecimal.valueOf(interval), 2,
+                        RoundingMode.HALF_UP);
                 break;
 
             case MONTHLY:
@@ -458,7 +509,7 @@ public class SubscriptionService {
             default:
                 monthlyEquivalent = BigDecimal.ZERO;
         }
-        
+
         return monthlyEquivalent;
     }
 
@@ -466,7 +517,7 @@ public class SubscriptionService {
      * Set derived fields for a subscription DTO.
      * 
      * @param subscriptionDto the subscription DTO to set derived fields for
-     * @param subscription the subscription entity to get information from
+     * @param subscription    the subscription entity to get information from
      */
     private void setDerivedFields(SubscriptionDto subscriptionDto, Subscription subscription) {
         // Set category name
@@ -482,12 +533,10 @@ public class SubscriptionService {
         // Calculate monthly equivalent amount
         if (subscriptionDto.getMonthlyEquivalentAmount() == null) {
             BigDecimal monthlyEquivalent = calculateMonthlyEquivalentAmount(
-                subscription.getAmount(),
-                subscription.getFrequency(),
-                subscription.getInterval()
-            );
+                    subscription.getAmount(),
+                    subscription.getFrequency(),
+                    subscription.getInterval());
             subscriptionDto.setMonthlyEquivalentAmount(monthlyEquivalent);
         }
     }
 }
-

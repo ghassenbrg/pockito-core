@@ -69,6 +69,8 @@ public interface SubscriptionMapper {
     @Mapping(target = "categoryId", ignore = true) // Category needs to be handled separately
     @Mapping(target = "defaultWalletId", ignore = true) // Wallet needs to be handled separately
     @Mapping(target = "id", ignore = true) // ID should not be changed
+    @Mapping(target = "nextDueDate", ignore = true) // Next due date is calculated by the service
+    @Mapping(target = "lastPaymentDate", ignore = true) // Last payment date is calculated by the service
     @Mapping(target = "createdAt", ignore = true) // Audit fields are managed by the system
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "version", ignore = true)
