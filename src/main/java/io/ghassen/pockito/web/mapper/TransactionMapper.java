@@ -39,7 +39,7 @@ public interface TransactionMapper {
     @Mapping(source = "subscription.name", target = "subscriptionName")
     @Mapping(source = "walletFrom.name", target = "walletFromName")
     @Mapping(source = "walletTo.name", target = "walletToName")
-    @Mapping(source = "walletFrom.currency", target = "walletFromCurrency")
+    @Mapping(expression = "java(transaction.getWalletFrom() != null ? transaction.getWalletFrom().getCurrency() : (transaction.getSubscription() != null ? transaction.getSubscription().getCurrency() : null))", target = "walletFromCurrency")
     @Mapping(source = "walletTo.currency", target = "walletToCurrency")
     @Mapping(source = "category.name", target = "categoryName")
     @Mapping(expression = "java(transaction.getSubscription() != null ? transaction.getSubscription().getIconUrl() : (transaction.getCategory() != null ? transaction.getCategory().getIconUrl() : null))", target = "iconUrl")

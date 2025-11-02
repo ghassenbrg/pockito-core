@@ -61,7 +61,7 @@ public class TransactionService {
         log.info("Creating transaction for user: {}", username);
 
         // Validate and set related entities
-        Transaction transaction = validateAndBuildTransaction(transactionDto);
+        Transaction transaction = validateAndBuildTransaction(transactionDto, null);
 
         // Save the transaction
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -210,7 +210,7 @@ public class TransactionService {
      * @return the validated Transaction entity
      * @throws IllegalArgumentException if validation fails
      */
-    private Transaction validateAndBuildTransaction(TransactionDto transactionDto) {
+    private Transaction validateAndBuildTransaction(TransactionDto transactionDto, Transaction existingTransaction) {
 
         // Validate that the username in the DTO matches the authenticated user
         String currentUser = SecurityUtils.getCurrentUserId();
@@ -222,7 +222,7 @@ public class TransactionService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + transactionDto.getUsername()));
 
         // Validate transaction type specific rules
-        validateTransactionTypeRules(transactionDto);
+        validateTransactionTypeRules(transactionDto, existingTransaction);
 
         // Build the transaction entity
         Transaction transaction = transactionMapper.toEntity(transactionDto);
@@ -246,7 +246,7 @@ public class TransactionService {
      */
     private void validateAndUpdateTransaction(TransactionDto transactionDto, Transaction existingTransaction) {
         // Validate transaction type specific rules
-        validateTransactionTypeRules(transactionDto);
+        validateTransactionTypeRules(transactionDto, existingTransaction);
 
         // Update the entity with new data
         transactionMapper.updateEntityFromDto(transactionDto, existingTransaction);
@@ -264,15 +264,25 @@ public class TransactionService {
      * @param transactionDto the transaction DTO to validate
      * @throws IllegalArgumentException if validation fails
      */
-    private void validateTransactionTypeRules(TransactionDto transactionDto) {
+    private void validateTransactionTypeRules(TransactionDto transactionDto, Transaction existingTransaction) {
+        TransactionType type = transactionDto.getTransactionType();
+        
+        // Check if subscription is set (either from DTO or existing transaction)
+        boolean hasSubscription = transactionDto.getSubscriptionId() != null || 
+                                 (existingTransaction != null && existingTransaction.getSubscription() != null);
+        
+        // Special rule: if subscriptionId is set, transaction must be EXPENSE type
+        if (hasSubscription && type != TransactionType.EXPENSE) {
+            throw new IllegalArgumentException("Transactions with a subscription must be of type EXPENSE");
+        }
+        
         // Special rule: if subscriptionId is set, walletFrom and walletTo can both be null
-        if (transactionDto.getSubscriptionId() != null) {
+        // This allows expense transactions from subscriptions to have null walletFrom
+        if (hasSubscription) {
             log.debug("Transaction has subscriptionId set, allowing walletFrom and walletTo to be null");
             // Still need to validate other fields, but skip wallet validation
             return;
         }
-
-        TransactionType type = transactionDto.getTransactionType();
 
         switch (type) {
             case EXPENSE:
@@ -281,8 +291,10 @@ public class TransactionService {
                     log.debug("Forcing walletTo to null for EXPENSE transaction");
                     transactionDto.setWalletToId(null);
                 }
+                // EXPENSE transactions require walletFrom, unless they have a subscriptionId
+                // (which is checked above)
                 if (transactionDto.getWalletFromId() == null) {
-                    throw new IllegalArgumentException("EXPENSE transactions require walletFrom to be set");
+                    throw new IllegalArgumentException("EXPENSE transactions require walletFrom to be set (unless subscriptionId is provided)");
                 }
                 break;
 

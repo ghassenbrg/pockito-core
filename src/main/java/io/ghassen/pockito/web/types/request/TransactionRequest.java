@@ -2,6 +2,7 @@ package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.TransactionType;
 import io.ghassen.pockito.web.validation.CategoryId;
+import io.ghassen.pockito.web.validation.SubscriptionId;
 import io.ghassen.pockito.web.validation.WalletId;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -36,8 +37,8 @@ public class TransactionRequest {
 
     /**
      * Source wallet ID for the transaction.
-     * Required for TRANSFER and EXPENSE transactions.
-     * Can be NULL for INCOME transactions or external transfers.
+     * Required for TRANSFER and EXPENSE transactions (unless subscriptionId is provided).
+     * Can be NULL for INCOME transactions, external transfers, or expense transactions with a subscription.
      */
     @WalletId
     private String walletFromId;
@@ -49,7 +50,7 @@ public class TransactionRequest {
      */
     @WalletId
     private String walletToId;
-
+    
     /**
      * Base transaction amount in the source wallet's currency.
      * Required field with precision validation (17,2).

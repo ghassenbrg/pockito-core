@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -36,7 +35,7 @@ import io.ghassen.pockito.web.validation.TransactionId;
  * 
  * Entity behavior:
  * - TRANSFER: Requires both walletFrom and walletTo (one can be NULL for external transfers)
- * - EXPENSE: Requires walletFrom, category is optional but recommended
+ * - EXPENSE: Requires walletFrom (unless subscriptionId is set, then walletFrom can be NULL)
  * - INCOME: Requires walletTo, category is optional but recommended
  * - Exchange rate defaults to 1.0 and is used to calculate walletToAmount
  * - Effective date determines when the transaction takes effect
@@ -190,8 +189,9 @@ public class Transaction extends AuditableEntity {
     /**
      * Subscription that generated this transaction.
      * If set, indicates this transaction was created from a subscription payment.
-     * When subscriptionId is set, walletFrom and walletTo can both be null
-     * (for automatic billing logic).
+     * When subscriptionId is set:
+     * - Transaction type must be EXPENSE
+     * - walletFrom and walletTo can both be null (for automatic billing logic)
      */
     @ManyToOne(optional = true)
     @JoinColumn(
