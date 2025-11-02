@@ -1,7 +1,6 @@
 package io.ghassen.pockito.web;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -48,6 +47,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<Object> handleNotFound(RuntimeException ex) {
     return problem(HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<Object> handleGeneric(Exception ex) {
+    return problem(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
   }
 
   private ResponseEntity<Object> problem(HttpStatus status, String message) {
