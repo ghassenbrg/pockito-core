@@ -184,4 +184,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
      */
     @Query("SELECT t FROM Transaction t WHERE t.walletFrom.id = :walletId OR t.walletTo.id = :walletId")
     List<Transaction> findAllByWalletId(@Param("walletId") String walletId);
+
+    /**
+     * Find all transactions linked to a specific subscription.
+     * Used for handling transactions when a subscription is deleted.
+     * 
+     * @param subscriptionId the subscription ID to filter by
+     * @return list of transactions linked to the specified subscription
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.subscription.id = :subscriptionId")
+    List<Transaction> findBySubscriptionId(@Param("subscriptionId") String subscriptionId);
 }

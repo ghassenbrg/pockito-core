@@ -250,6 +250,10 @@ public class SubscriptionService {
     /**
      * Delete a subscription for the authenticated user.
      * 
+     * If the subscription has transactions:
+     * - If transactions are linked to wallets, unlink them from the subscription and set their note to the subscription name if null
+     * - If transactions are NOT linked to any wallet, delete them
+     * 
      * @param subscriptionId the subscription ID to delete
      * @throws IllegalArgumentException if subscription not found or not owned by
      *                                  user
@@ -261,6 +265,33 @@ public class SubscriptionService {
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
                 .filter(sub -> sub.getUser().getUsername().equals(username))
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found or access denied"));
+
+        // Get all transactions linked to this subscription
+        List<Transaction> linkedTransactions = transactionRepository.findBySubscriptionId(subscriptionId);
+        
+        if (!linkedTransactions.isEmpty()) {
+            log.debug("Found {} transactions linked to subscription {}", linkedTransactions.size(), subscriptionId);
+            
+            for (Transaction transaction : linkedTransactions) {
+                // Check if transaction is linked to any wallet
+                boolean hasWalletLink = transaction.getWalletFrom() != null || transaction.getWalletTo() != null;
+                
+                if (hasWalletLink) {
+                    // Unlink from subscription and update note if null
+                    transaction.setSubscription(null);
+                    if (transaction.getNote() == null || transaction.getNote().isEmpty()) {
+                        transaction.setNote(subscription.getName());
+                        log.debug("Set note to subscription name '{}' for transaction {}", subscription.getName(), transaction.getId());
+                    }
+                    transactionRepository.save(transaction);
+                    log.debug("Unlinked transaction {} from subscription", transaction.getId());
+                } else {
+                    // Delete transaction since it's not linked to any wallet
+                    transactionRepository.delete(transaction);
+                    log.debug("Deleted transaction {} as it's not linked to any wallet", transaction.getId());
+                }
+            }
+        }
 
         subscriptionRepository.delete(subscription);
         log.info("Deleted subscription with ID: {} for user: {}", subscriptionId, username);
@@ -294,23 +325,26 @@ public class SubscriptionService {
         }
 
         // Determine wallet to charge
-        Wallet wallet;
+        Wallet wallet = null;
         if (walletId != null) {
             wallet = walletRepository.findById(walletId)
                     .filter(w -> w.getUser().getUsername().equals(username))
                     .orElseThrow(() -> new IllegalArgumentException("Wallet not found or access denied"));
-        } else {
+        }
+        /* Uncomment this when we have a way to set the default wallet for a subscription
+        else {
             wallet = subscription.getDefaultWalletId();
             // Verify default wallet still exists and belongs to user
             if (wallet == null || !wallet.getUser().getUsername().equals(username)) {
                 throw new IllegalArgumentException("Default wallet not found or access denied");
             }
         }
+        */
 
         // Calculate transaction amount based on exchange rate if currencies differ
         BigDecimal transactionAmount;
 
-        if (!subscription.getCurrency().equals(wallet.getCurrency())) {
+        if (wallet != null && !subscription.getCurrency().equals(wallet.getCurrency())) {
             // Currencies differ, use provided exchange rate to calculate amount
             if (exchangeRate != null) {
                 // Calculate amount in wallet currency: subscription amount * exchange rate
