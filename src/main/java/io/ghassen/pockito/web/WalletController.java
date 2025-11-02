@@ -2,13 +2,13 @@ package io.ghassen.pockito.web;
 
 import io.ghassen.pockito.service.WalletService;
 import io.ghassen.pockito.domain.enums.WalletType;
+import io.ghassen.pockito.domain.validation.ValidationGroups;
 import io.ghassen.pockito.web.types.dto.WalletDto;
 import io.ghassen.pockito.web.types.request.WalletRequest;
 import io.ghassen.pockito.web.types.request.ReorderWalletsRequest;
 import io.ghassen.pockito.web.types.response.WalletResponse;
 import io.ghassen.pockito.web.types.response.WalletListResponse;
 import io.ghassen.pockito.web.mapper.WalletMapper;
-import io.ghassen.pockito.web.validation.ValidationGroups;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

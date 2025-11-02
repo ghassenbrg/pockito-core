@@ -1,9 +1,9 @@
 package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.TransactionType;
-import io.ghassen.pockito.web.validation.CategoryId;
-import io.ghassen.pockito.web.validation.SubscriptionId;
-import io.ghassen.pockito.web.validation.WalletId;
+import io.ghassen.pockito.domain.validation.CategoryId;
+import io.ghassen.pockito.domain.validation.SubscriptionId;
+import io.ghassen.pockito.domain.validation.WalletId;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;

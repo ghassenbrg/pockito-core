@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import io.ghassen.pockito.domain.enums.TransactionType;
-import io.ghassen.pockito.web.validation.TransactionId;
+import io.ghassen.pockito.domain.validation.TransactionId;
 
 /**
  * Transaction entity representing a financial transaction between wallets.

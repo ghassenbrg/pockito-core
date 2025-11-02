@@ -1,13 +1,12 @@
 package io.ghassen.pockito.domain.util;
 
-import io.ghassen.pockito.web.validation.PockitoId;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.ghassen.pockito.domain.validation.PockitoId;
 import jakarta.persistence.Id;
 
 /**

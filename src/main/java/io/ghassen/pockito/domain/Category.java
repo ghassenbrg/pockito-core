@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import io.ghassen.pockito.domain.enums.CategoryType;
-import io.ghassen.pockito.web.validation.CategoryId;
+import io.ghassen.pockito.domain.validation.CategoryId;
 
 /**
  * Category entity representing a user-defined category for organizing transactions or other entities.

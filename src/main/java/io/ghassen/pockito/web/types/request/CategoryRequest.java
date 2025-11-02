@@ -1,7 +1,7 @@
 package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.CategoryType;
-import io.ghassen.pockito.web.validation.CategoryId;
+import io.ghassen.pockito.domain.validation.CategoryId;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -1,4 +1,4 @@
-package io.ghassen.pockito.web.validation;
+package io.ghassen.pockito.domain.validation;
 
 /**
  * Validation groups for different operations.

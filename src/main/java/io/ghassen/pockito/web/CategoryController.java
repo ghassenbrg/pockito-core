@@ -1,6 +1,7 @@
 package io.ghassen.pockito.web;
 
 import io.ghassen.pockito.domain.enums.CategoryType;
+import io.ghassen.pockito.domain.validation.ValidationGroups;
 import io.ghassen.pockito.service.CategoryService;
 import io.ghassen.pockito.web.types.dto.CategoryDto;
 import io.ghassen.pockito.web.types.request.CategoryRequest;
@@ -11,7 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
-import io.ghassen.pockito.web.validation.ValidationGroups;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

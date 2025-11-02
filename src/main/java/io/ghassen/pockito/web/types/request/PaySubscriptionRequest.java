@@ -1,6 +1,5 @@
 package io.ghassen.pockito.web.types.request;
 
-import io.ghassen.pockito.web.validation.WalletId;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import lombok.AllArgsConstructor;
@@ -9,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+
+import io.ghassen.pockito.domain.validation.WalletId;
 
 /**
  * Request DTO for paying a subscription.

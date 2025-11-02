@@ -1,6 +1,7 @@
 package io.ghassen.pockito.web;
 
 import io.ghassen.pockito.domain.User;
+import io.ghassen.pockito.domain.validation.ValidationGroups;
 import io.ghassen.pockito.security.SecurityUtils;
 import io.ghassen.pockito.service.UserService;
 import io.ghassen.pockito.web.types.dto.UserDto;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
-import io.ghassen.pockito.web.validation.ValidationGroups;
 
 import java.util.Optional;
 

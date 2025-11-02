@@ -32,7 +32,7 @@ import io.ghassen.pockito.domain.enums.CurrencyCode;
 import io.ghassen.pockito.domain.enums.DayOfWeek;
 import io.ghassen.pockito.domain.enums.MonthOfYear;
 import io.ghassen.pockito.domain.enums.SubscriptionFrequency;
-import io.ghassen.pockito.web.validation.SubscriptionId;
+import io.ghassen.pockito.domain.validation.SubscriptionId;
 import jakarta.persistence.Convert;
 
 /**

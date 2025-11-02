@@ -2,7 +2,7 @@ package io.ghassen.pockito.web.types.request;
 
 import io.ghassen.pockito.domain.enums.CurrencyCode;
 import io.ghassen.pockito.domain.enums.WalletType;
-import io.ghassen.pockito.web.validation.ValidationGroups;
+import io.ghassen.pockito.domain.validation.ValidationGroups;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;

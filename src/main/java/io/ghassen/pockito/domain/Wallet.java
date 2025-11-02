@@ -27,7 +27,7 @@ import java.math.BigDecimal;
 
 import io.ghassen.pockito.domain.enums.CurrencyCode;
 import io.ghassen.pockito.domain.enums.WalletType;
-import io.ghassen.pockito.web.validation.WalletId;
+import io.ghassen.pockito.domain.validation.WalletId;
 
 /**
  * Wallet entity representing a user's financial account or instrument.
