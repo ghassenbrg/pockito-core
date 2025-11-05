@@ -12,6 +12,8 @@ import io.ghassen.pockito.transaction.web.api.response.TransactionResponse;
 import io.ghassen.pockito.transaction.web.mapper.TransactionApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 
@@ -146,6 +148,10 @@ public class SubscriptionController {
                 "Exchange rate is only used if subscription currency differs from wallet currency, otherwise it's ignored. " +
                 "If skip is true, skips payment and transaction creation, only updates nextDueDate and lastPaymentDate."
     )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Payment Skipped successfully"),
+        @ApiResponse(responseCode = "200", description = "Payment processed successfully and transaction created")
+    })
     public ResponseEntity<TransactionResponse> paySubscription(
             @Parameter(description = "Subscription ID to pay") 
             @PathVariable String subscriptionId,
